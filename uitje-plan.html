@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Uitje &#8212; Wanneer kan iedereen?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F4EC;
+    --ink:#14161A;
+    --red:#D6402C;
+    --blue:#1B4E9B;
+    --yellow:#F2B705;
+    --line:3px;
+  }
+  *{box-sizing:border-box;}
+  button, a, select, input{ transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
+  html{scroll-behavior:smooth; color-scheme:light;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:17px;
+    line-height:1.55;
+  }
+  h1,h2,.wordmark,.btn{ font-family:'Space Grotesk',sans-serif; }
+  a{color:inherit;}
+  .wrap{ max-width:760px; margin:0 auto; padding:0 28px; }
+  :focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+
+  nav.wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-top:26px;
+    padding-bottom:10px;
+  }
+  .wordmark{ font-size:22px; font-weight:700; letter-spacing:-0.01em; }
+  .wordmark span{color:var(--red);}
+  .back-link{
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink);
+    text-decoration:none;
+    border-bottom:2px solid var(--ink);
+  }
+  .back-link:hover{color:var(--blue); border-color:var(--blue);}
+
+  main{padding:20px 0 80px;}
+  h2{ font-size:clamp(28px,4.5vw,38px); margin:0 0 14px; line-height:1.1; }
+  .lede2{ font-size:17px; max-width:56ch; color:#3a3d42; margin:0 0 40px; }
+
+  .demo-col-label{
+    font-size:13px;
+    font-weight:600;
+    color:#6b6e73;
+    margin:0 0 14px;
+  }
+  .block{margin-bottom:52px;}
+
+  .share-box{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
+  .chip-input, .date-input, .chip-select{
+    border:2px solid var(--ink);
+    padding:9px 12px;
+    font-size:14px;
+    font-weight:600;
+    font-family:'Space Grotesk',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .share-input{flex:1; min-width:200px; cursor:text;}
+  .microcopy{ font-size:14px; color:#6b6e73; margin:0 0 8px; }
+  .demo-note{font-style:italic;}
+
+  .nav-btn{
+    border:var(--line) solid var(--ink);
+    background:none;
+    padding:9px 18px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    color:var(--ink);
+    text-decoration:none;
+    display:inline-block;
+  }
+  .nav-btn:hover{ background:var(--ink); color:var(--paper); }
+
+  .field-row{ margin-bottom:16px; }
+  .field-row label{ display:block; font-size:13px; font-weight:600; color:#54575c; margin-bottom:6px; }
+  .date-input{ width:100%; max-width:220px; }
+  .date-list{ display:flex; flex-direction:column; gap:12px; margin-bottom:20px; max-width:260px; }
+
+  .chip-row{ display:flex; flex-wrap:wrap; gap:10px; }
+  .date-chip{
+    border:2px solid var(--ink);
+    background:var(--paper);
+    color:var(--ink);
+    padding:12px 18px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .date-chip:hover{background:#e9e4d5;}
+  .date-chip.selected{ background:var(--blue); color:var(--paper); }
+
+  .result-chip{
+    border:2px solid var(--ink);
+    padding:12px 16px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    min-width:90px;
+    text-align:center;
+  }
+  .lvl0{background:var(--paper);}
+  .lvl1{background:#D9E6F7;}
+  .lvl2{background:#B0CCEF;}
+  .lvl3{background:#6FA0DE; color:var(--paper);}
+  .lvl4{background:var(--blue); color:var(--paper);}
+  .result-chip.best{ outline:3px solid var(--red); outline-offset:-3px; position:relative; }
+  .result-chip .count{ display:block; font-size:20px; margin-top:4px; }
+  .result-text{ margin-top:16px; font-size:15px; }
+  .tijdstip-note{ font-size:14px; color:#54575c; margin:0 0 16px; }
+
+  footer{padding:36px 0 50px; border-top:2px solid var(--ink);}
+  footer .wrap{ font-size:13.5px; color:#6b6e73; }
+</style>
+</head>
+<body>
+
+<nav class="wrap">
+  <div class="wordmark">Uit<span>je</span></div>
+  <a class="back-link" href="./index.html">&#8592; Terug naar Uitje</a>
+</nav>
+
+<main class="wrap">
+  <h2>Wanneer kan iedereen?</h2>
+  <p class="lede2">Kies een paar datums die voor jou werken, deel &eacute;&eacute;n linkje, en iedereen laat weten welke datum ook bij hen past.</p>
+
+  <!-- SETUP: alleen zichtbaar voordat er een linkje bestaat -->
+  <div class="block" id="setup-block">
+    <p class="demo-col-label">Kies je datums</p>
+
+    <div class="field-row">
+      <label for="setup-tijdstip">Tijdstip</label>
+      <select id="setup-tijdstip" class="chip-select">
+        <option value="ochtend">'s ochtends</option>
+        <option value="middag">'s middags</option>
+        <option value="avond" selected>'s avonds</option>
+      </select>
+    </div>
+
+    <div class="date-list" id="date-inputs">
+      <div class="field-row">
+        <label for="setup-date-1">Datum 1</label>
+        <input type="date" id="setup-date-1" class="date-input">
+      </div>
+      <div class="field-row">
+        <label for="setup-date-2">Datum 2</label>
+        <input type="date" id="setup-date-2" class="date-input">
+      </div>
+      <div class="field-row">
+        <label for="setup-date-3">Datum 3 (optioneel)</label>
+        <input type="date" id="setup-date-3" class="date-input">
+      </div>
+      <div class="field-row">
+        <label for="setup-date-4">Datum 4 (optioneel)</label>
+        <input type="date" id="setup-date-4" class="date-input">
+      </div>
+    </div>
+
+    <button type="button" class="nav-btn" onclick="createPlanFromSetup()">Linkje maken</button>
+    <p class="microcopy" id="setup-status" style="margin-top:10px;">Vul minstens 2 datums in.</p>
+  </div>
+
+  <!-- JIJ DEELT: alleen zichtbaar als dit jouw eigen plan is -->
+  <div class="block" id="share-block" style="display:none;">
+    <p class="demo-col-label">Jij deelt</p>
+    <div class="share-box">
+      <input type="text" id="share-link" class="chip-input share-input" readonly value="">
+      <button type="button" class="nav-btn" onclick="copyShareLink()">Kopieer linkje</button>
+    </div>
+    <p class="microcopy" id="share-note">Deel dit met je vrienden.</p>
+    <p class="microcopy demo-note" id="setup-note" style="display:none;">Demo &#8212; dit linkje werkt nog niet echt totdat de Supabase-sleutel is ingevuld.</p>
+    <p class="microcopy"><a href="#" onclick="startNewPlan(); return false;" style="color:var(--blue); text-decoration:underline;">Nieuw plan starten (nieuw linkje)</a></p>
+  </div>
+
+  <!-- ZIJ VULLEN IN: alleen zichtbaar via het gedeelde linkje -->
+  <div class="block" id="respond-block" style="display:none;">
+    <p class="demo-col-label">Zij vullen in</p>
+    <p class="tijdstip-note" id="respond-tijdstip-note"></p>
+    <input type="text" id="resp-naam" class="chip-input" placeholder="Jouw naam" style="margin-bottom:14px;width:100%;max-width:240px;">
+    <div class="chip-row" id="date-picker"></div>
+    <div class="share-box" style="margin-top:16px;">
+      <button type="button" class="nav-btn" onclick="submitAvailability()">Versturen</button>
+    </div>
+    <p class="microcopy" id="resp-status">Vul je naam in, tik de datums aan die voor jou werken, en verstuur.</p>
+  </div>
+
+  <!-- RESULTAAT: zichtbaar zodra er een plan is -->
+  <div class="block" id="result-block" style="display:none;">
+    <div class="share-box" style="margin-bottom:10px;">
+      <p class="demo-col-label" style="margin:0;">Resultaat</p>
+      <button type="button" class="nav-btn" onclick="refreshResults()">Nu verversen</button>
+    </div>
+    <p class="tijdstip-note" id="result-tijdstip-note"></p>
+    <div class="chip-row" id="result-chips"></div>
+    <p class="result-text" id="result-text"></p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">Onderdeel van Uitje.</div>
+</footer>
+
+<script>
+  // ===== SUPABASE CONFIG (zelfde project als de hoofdpagina) =====
+  var SUPABASE_URL = 'https://bnbgceutzjypumstzdri.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_ZMe6lfs6wx1E2EapJeT5QA_GDIbN6r7';
+  var SUPABASE_READY = SUPABASE_URL.indexOf('VUL-IN') === -1 && SUPABASE_ANON_KEY.indexOf('VUL-IN') === -1;
+
+  var TIJDSTIP_LABELS = { ochtend: "'s ochtends", middag: "'s middags", avond: "'s avonds" };
+
+  var planCode = null;
+  var planDates = [];      // array van 'YYYY-MM-DD' strings
+  var planTijdstip = 'avond';
+
+  function getPlanCodeFromURL(){
+    var params = new URLSearchParams(window.location.search);
+    return params.get('plan');
+  }
+
+  function buildShareLink(code){
+    return window.location.origin + window.location.pathname + '?plan=' + code;
+  }
+
+  function formatDateNL(dateStr){
+    try {
+      var d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
+    } catch (err){
+      return dateStr;
+    }
+  }
+
+  function showBlock(id, show){
+    var el = document.getElementById(id);
+    if (el) el.style.display = show ? 'block' : 'none';
+  }
+
+  // ===== SETUP (organisator kiest datums) =====
+
+  function collectSetupDates(){
+    var dates = [];
+    for (var i = 1; i <= 4; i++){
+      var input = document.getElementById('setup-date-' + i);
+      if (input && input.value) dates.push(input.value);
+    }
+    return dates;
+  }
+
+  async function createPlanFromSetup(){
+    var status = document.getElementById('setup-status');
+    var dates = collectSetupDates();
+    if (dates.length < 2){
+      if (status) status.textContent = 'Vul minstens 2 datums in.';
+      return;
+    }
+    var tijdstip = document.getElementById('setup-tijdstip').value;
+
+    var chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+    var code = '';
+    for (var i = 0; i < 6; i++){
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    if (SUPABASE_READY){
+      try {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/plans', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ id: code, dates: dates, tijdstip: tijdstip })
+        });
+        if (!res.ok){
+          var errText = await res.text();
+          console.error('Supabase fout bij plan aanmaken:', res.status, errText);
+          if (status) status.textContent = 'Fout (' + res.status + '): ' + errText;
+          return;
+        }
+      } catch (err){
+        console.error('Kon plan niet aanmaken:', err);
+        if (status) status.textContent = 'Netwerkfout: ' + err.message;
+        return;
+      }
+    }
+
+    planCode = code;
+    planDates = dates;
+    planTijdstip = tijdstip;
+    try {
+      localStorage.setItem('uitje_eigen_plan_code', code);
+    } catch (err) { /* localStorage niet beschikbaar */ }
+
+    showBlock('setup-block', false);
+    showShareBlock();
+    renderResultChips();
+    refreshResults();
+  }
+
+  function showShareBlock(){
+    var link = document.getElementById('share-link');
+    if (link) link.value = buildShareLink(planCode);
+    var setupNote = document.getElementById('setup-note');
+    if (setupNote) setupNote.style.display = SUPABASE_READY ? 'none' : 'block';
+    showBlock('share-block', true);
+    showBlock('result-block', true);
+  }
+
+  function startNewPlan(){
+    try { localStorage.removeItem('uitje_eigen_plan_code'); } catch (err) { /* no-op */ }
+    if (getPlanCodeFromURL()){
+      window.location.href = window.location.origin + window.location.pathname;
+      return;
+    }
+    window.location.reload();
+  }
+
+  function copyShareLink(){
+    var link = document.getElementById('share-link');
+    if (!link) return;
+    var restore = function(btn, original){
+      setTimeout(function(){ btn.textContent = original; }, 1800);
+    };
+    var btn = event ? event.target : null;
+    var originalLabel = btn ? btn.textContent : null;
+
+    function showCopied(){
+      if (btn){
+        btn.textContent = 'Gekopieerd!';
+        restore(btn, originalLabel);
+      }
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link.value).then(showCopied).catch(function(){
+        fallbackCopy(link, showCopied);
+      });
+    } else {
+      fallbackCopy(link, showCopied);
+    }
+  }
+
+  function fallbackCopy(input, onDone){
+    input.removeAttribute('readonly');
+    input.select();
+    input.setSelectionRange(0, 99999);
+    try { document.execCommand('copy'); } catch (err) { /* no-op */ }
+    input.setAttribute('readonly', 'readonly');
+    if (onDone) onDone();
+  }
+
+  // ===== OPHALEN VAN EEN BESTAAND PLAN (datums + tijdstip) =====
+
+  async function fetchPlanInfo(code){
+    if (!SUPABASE_READY) return null;
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/plans?id=eq.' + encodeURIComponent(code) + '&select=dates,tijdstip', {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      });
+      var data = await res.json();
+      if (data && data.length > 0) return data[0];
+      return null;
+    } catch (err){
+      console.error('Kon plan niet ophalen:', err);
+      return null;
+    }
+  }
+
+  // ===== ZIJ VULLEN IN (genodigde) =====
+
+  function renderDatePicker(){
+    var container = document.getElementById('date-picker');
+    if (!container) return;
+    var html = '';
+    planDates.forEach(function(d){
+      html += '<button type="button" class="date-chip" data-date="' + d + '" onclick="this.classList.toggle(\'selected\')">' + formatDateNL(d) + '</button>';
+    });
+    container.innerHTML = html;
+
+    var note = document.getElementById('respond-tijdstip-note');
+    if (note) note.textContent = 'Tijdstip: ' + (TIJDSTIP_LABELS[planTijdstip] || planTijdstip) + '.';
+  }
+
+  async function submitAvailability(){
+    var status = document.getElementById('resp-status');
+    var naam = (document.getElementById('resp-naam').value || '').trim();
+
+    if (!naam){
+      if (status) status.textContent = 'Vul eerst je naam in.';
+      return;
+    }
+    var selected = [];
+    document.querySelectorAll('#date-picker .date-chip.selected').forEach(function(chip){
+      selected.push(chip.getAttribute('data-date'));
+    });
+    if (selected.length === 0){
+      if (status) status.textContent = 'Tik minstens \u00e9\u00e9n datum aan.';
+      return;
+    }
+    if (!SUPABASE_READY){
+      if (status) status.textContent = 'Nog niet gekoppeld aan Supabase \u2014 dit is nog een demo.';
+      return;
+    }
+    if (!planCode){
+      if (status) status.textContent = 'Geen plan gevonden om op te reageren.';
+      return;
+    }
+
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/responses', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ plan_id: planCode, naam: naam, beschikbaarheid: selected })
+      });
+      if (!res.ok){
+        var errText = await res.text();
+        console.error('Supabase fout bij versturen:', res.status, errText);
+        if (status) status.textContent = 'Fout (' + res.status + '): ' + errText;
+        return;
+      }
+      if (status) status.textContent = 'Bedankt ' + naam + '! Je beschikbaarheid is opgeslagen.';
+      refreshResults();
+    } catch (err){
+      console.error('Kon reactie niet opslaan:', err);
+      if (status) status.textContent = 'Netwerkfout: ' + err.message;
+    }
+  }
+
+  // ===== RESULTAAT =====
+
+  function levelClassFor(count, total){
+    if (total <= 0 || count <= 0) return 'lvl0';
+    var ratio = count / total;
+    if (ratio <= 0.25) return 'lvl1';
+    if (ratio <= 0.5) return 'lvl2';
+    if (ratio <= 0.75) return 'lvl3';
+    return 'lvl4';
+  }
+
+  function renderResultChips(){
+    var container = document.getElementById('result-chips');
+    if (!container) return;
+    var html = '';
+    planDates.forEach(function(d){
+      html += '<div class="result-chip lvl0" id="res-' + d + '">' + formatDateNL(d) + '<span class="count">0</span></div>';
+    });
+    container.innerHTML = html;
+
+    var note = document.getElementById('result-tijdstip-note');
+    if (note) note.textContent = 'Tijdstip: ' + (TIJDSTIP_LABELS[planTijdstip] || planTijdstip) + '.';
+  }
+
+  async function refreshResults(){
+    var resultText = document.getElementById('result-text');
+    if (!SUPABASE_READY){
+      if (resultText) resultText.innerHTML = '<strong>Nog niet gekoppeld</strong> &#8212; vul de Supabase-gegevens in de code in om live resultaten te zien.';
+      return;
+    }
+    if (!planCode || planDates.length === 0){
+      if (resultText) resultText.textContent = 'Nog geen plan gevonden.';
+      return;
+    }
+
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/responses?plan_id=eq.' + encodeURIComponent(planCode) + '&select=naam,beschikbaarheid', {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      });
+      var data = await res.json();
+      var total = data.length;
+
+      var counts = {};
+      data.forEach(function(r){
+        (r.beschikbaarheid || []).forEach(function(d){
+          counts[d] = (counts[d] || 0) + 1;
+        });
+      });
+
+      var bestDate = null, bestCount = -1;
+      planDates.forEach(function(d){
+        var count = counts[d] || 0;
+        var chip = document.getElementById('res-' + d);
+        if (chip){
+          chip.className = 'result-chip ' + levelClassFor(count, total);
+          chip.innerHTML = formatDateNL(d) + '<span class="count">' + count + '</span>';
+        }
+        if (count > bestCount){
+          bestCount = count;
+          bestDate = d;
+        }
+      });
+
+      var bestChip = bestDate ? document.getElementById('res-' + bestDate) : null;
+      if (bestChip) bestChip.classList.add('best');
+
+      if (resultText){
+        if (total === 0){
+          resultText.innerHTML = '<strong>Nog geen reacties</strong> &#8212; deel het linkje om beschikbaarheid te verzamelen.';
+        } else {
+          resultText.innerHTML = '<strong>Beste datum: ' + formatDateNL(bestDate) + '</strong> \u2014 ' + bestCount + ' van de ' + total + ' kunnen';
+        }
+      }
+    } catch (err){
+      console.error('Kon resultaten niet ophalen:', err);
+      if (resultText) resultText.textContent = 'Kon resultaten niet ophalen.';
+    }
+  }
+
+  // ===== INIT =====
+
+  async function init(){
+    var existingCode = getPlanCodeFromURL();
+
+    if (existingCode){
+      // Genodigde: dit IS het plan.
+      planCode = existingCode;
+      var info = await fetchPlanInfo(existingCode);
+      if (info){
+        planDates = info.dates || [];
+        planTijdstip = info.tijdstip || 'avond';
+      }
+      showBlock('setup-block', false);
+      showBlock('share-block', false);
+      showBlock('respond-block', true);
+      renderDatePicker();
+      renderResultChips();
+      showBlock('result-block', true);
+      refreshResults();
+      if (SUPABASE_READY) setInterval(refreshResults, 10000);
+      return;
+    }
+
+    var stored = null;
+    try { stored = localStorage.getItem('uitje_eigen_plan_code'); } catch (err) { /* no-op */ }
+
+    if (stored){
+      // Organisator die terugkomt op zijn eigen plan.
+      planCode = stored;
+      var ownInfo = await fetchPlanInfo(stored);
+      if (ownInfo){
+        planDates = ownInfo.dates || [];
+        planTijdstip = ownInfo.tijdstip || 'avond';
+      }
+      showBlock('setup-block', false);
+      showShareBlock();
+      renderResultChips();
+      refreshResults();
+      if (SUPABASE_READY) setInterval(refreshResults, 10000);
+      return;
+    }
+
+    // Nieuw bezoek: toon het formulier om datums te kiezen.
+    showBlock('setup-block', true);
+    showBlock('share-block', false);
+    showBlock('respond-block', false);
+    showBlock('result-block', false);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

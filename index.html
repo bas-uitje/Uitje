@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Uitje — nooit meer &#8216;wat zullen we doen&#8217;</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F4EC;
+    --ink:#14161A;
+    --red:#D6402C;
+    --blue:#1B4E9B;
+    --yellow:#F2B705;
+    --line:3px;
+  }
+  *{box-sizing:border-box;}
+  button, a, select, .avail-cell{ transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
+  html{scroll-behavior:smooth; color-scheme:light;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:17px;
+    line-height:1.55;
+  }
+  h1,h2,h3,.wordmark,.btn,.chip,.step-num{
+    font-family:'Space Grotesk',sans-serif;
+  }
+  a{color:inherit;}
+  img,svg{display:block;max-width:100%;}
+  .wrap{
+    max-width:1120px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+  :focus-visible{
+    outline:3px solid var(--blue);
+    outline-offset:2px;
+  }
+
+  /* PARTY SIZE (as a field inside 'Jij vult in') */
+  .chip-label{
+    font-size:12px;
+    font-weight:700;
+    color:#54575c;
+  }
+  .stepper{
+    display:flex;
+    align-items:center;
+    border:2px solid var(--ink);
+  }
+  .step-btn{
+    background:none;
+    border:none;
+    color:var(--ink);
+    width:32px;
+    height:32px;
+    font-size:18px;
+    font-weight:700;
+    cursor:pointer;
+    line-height:1;
+  }
+  .step-btn:hover{background:var(--yellow); color:var(--ink);}
+  .stepper input{
+    width:48px;
+    text-align:center;
+    border:none;
+    border-left:2px solid var(--ink);
+    border-right:2px solid var(--ink);
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    height:32px;
+    -moz-appearance:textfield;
+  }
+  .stepper input::-webkit-outer-spin-button,
+  .stepper input::-webkit-inner-spin-button{
+    -webkit-appearance:none;
+    margin:0;
+  }
+
+  /* NAV */
+  nav.wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-top:26px;
+    padding-bottom:26px;
+  }
+  .wordmark{
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  .wordmark span{color:var(--red);}
+  .nav-btn{
+    border:var(--line) solid var(--ink);
+    background:none;
+    padding:9px 18px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    color:var(--ink);
+    text-decoration:none;
+  }
+  .nav-btn:hover{ background:var(--ink); color:var(--paper); }
+
+  /* HERO */
+  .hero{
+    padding:20px 0 40px;
+  }
+  .hero .wrap{
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:56px;
+    align-items:center;
+  }
+  .hero h1{
+    font-size:clamp(38px,5.4vw,58px);
+    line-height:1.05;
+    font-weight:700;
+    margin:0 0 20px;
+    letter-spacing:-0.015em;
+    color:#0B0C0E;
+  }
+  .hero p.lede{
+    font-size:19px;
+    max-width:46ch;
+    margin:0 0 20px;
+    color:#2A2D31;
+  }
+  .hero-cta-hint{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    color:var(--red);
+    margin:0;
+  }
+  form.signup{
+    display:flex;
+    gap:0;
+    max-width:440px;
+    border:var(--line) solid var(--ink);
+  }
+  form.signup input[type=email]{
+    flex:1;
+    border:none;
+    padding:15px 16px;
+    font-size:16px;
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    min-width:0;
+  }
+  form.signup input[type=email]::placeholder{color:#8a8d92;}
+  form.signup button{
+    border:none;
+    border-left:var(--line) solid var(--ink);
+    background:var(--yellow);
+    padding:0 22px;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  form.signup button:hover{ background:var(--ink); color:var(--yellow); }
+  .microcopy{
+    font-size:14px;
+    color:#6b6e73;
+    margin-top:12px;
+  }
+  .form-block{max-width:440px;}
+  .thanks{
+    display:none;
+    border:var(--line) solid var(--ink);
+    padding:16px 18px;
+    max-width:440px;
+    background:var(--paper);
+    font-weight:600;
+  }
+
+  /* Mondrian deco */
+  .deco{
+    aspect-ratio:1/1;
+    border:var(--line) solid var(--ink);
+    display:grid;
+    grid-template-columns:1.3fr 1fr 0.8fr;
+    grid-template-rows:0.9fr 1.4fr 0.7fr;
+    gap:var(--line);
+    background:var(--ink);
+    opacity:0;
+    transform:translateY(10px);
+    animation:settle .7s ease-out .15s forwards;
+  }
+  @keyframes settle{ to{opacity:1; transform:translateY(0);} }
+  .deco > div{background:var(--paper);}
+  .deco .b1{background:var(--red); grid-column:1; grid-row:1/3;}
+  .deco .b2{background:var(--paper); grid-column:2; grid-row:1;}
+  .deco .b3{background:var(--blue); grid-column:3; grid-row:1/4;}
+  .deco .b4{background:var(--paper); grid-column:2; grid-row:2;}
+  .deco .b5{background:var(--yellow); grid-column:1/3; grid-row:3;}
+  @media (prefers-reduced-motion:reduce){
+    .deco{animation:none; opacity:1; transform:none;}
+  }
+
+  /* PROBLEM band */
+  .band-yellow{
+    background:var(--yellow);
+    border-top:var(--line) solid var(--ink);
+    border-bottom:var(--line) solid var(--ink);
+    padding:64px 0;
+  }
+  .band-yellow .inner{max-width:640px;}
+  .band-yellow h2{
+    font-size:clamp(26px,3.4vw,34px);
+    margin:0 0 18px;
+  }
+  .band-yellow p{font-size:18px; margin:0;}
+
+  /* DEMO */
+  .demo{padding:76px 0;}
+  .demo h2{
+    font-size:clamp(26px,3.4vw,34px);
+    margin:0 0 40px;
+  }
+  .demo-grid{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    gap:28px;
+    align-items:center;
+  }
+  .demo-col-label{
+    font-size:13px;
+    font-weight:600;
+    text-transform:none;
+    color:#6b6e73;
+    margin:0 0 14px;
+  }
+  .chips-form{display:flex; flex-direction:column; gap:12px; align-items:stretch; width:100%; max-width:340px;}
+  .chip-field{display:flex; flex-direction:column; gap:8px; width:100%;}
+  .chip-select,.chip-input{
+    border:2px solid var(--ink);
+    padding:9px 12px;
+    font-size:14px;
+    font-weight:600;
+    font-family:'Space Grotesk',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    cursor:pointer;
+    width:100%;
+  }
+  .chip-input{cursor:text; min-width:160px;}
+  .chip-select:focus,.chip-input:focus{outline:3px solid var(--blue); outline-offset:1px;}
+  .chip{
+    border:2px solid var(--ink);
+    padding:7px 14px;
+    font-size:14px;
+    font-weight:600;
+    background:var(--paper);
+  }
+  .arrow{
+    font-size:30px;
+    font-weight:700;
+    color:var(--red);
+  }
+  .plan-card{
+    border:var(--line) solid var(--ink);
+    background:var(--paper);
+    padding:26px 24px 22px;
+  }
+  .plan-summary{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:var(--red);
+    margin:0 0 14px;
+    padding-bottom:14px;
+    border-bottom:2px solid var(--ink);
+  }
+  .plan-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    padding:12px 0;
+    border-top:1px solid #d8d4c7;
+  }
+  .plan-row:first-child{border-top:none; padding-top:0;}
+  .plan-transfer{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    color:#6b6e73;
+    padding:4px 0 4px 66px;
+    letter-spacing:0.02em;
+  }
+  .plan-transfer::before{
+    content:'';
+    display:inline-block;
+    width:6px;
+    height:6px;
+    background:var(--blue);
+    border-radius:50%;
+    margin-right:8px;
+    vertical-align:middle;
+  }
+  .plan-time{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:var(--blue);
+    white-space:nowrap;
+    min-width:52px;
+  }
+  .plan-text{flex:1; min-width:160px;}
+  .plan-text strong{display:block; font-size:15px;}
+  .plan-title-link{
+    display:block;
+    font-size:15px;
+    font-weight:700;
+    color:var(--ink);
+    text-decoration:none;
+    font-family:'Inter',sans-serif;
+  }
+  .plan-title-link:hover{text-decoration:underline;}
+  .plan-actions{
+    display:flex;
+    gap:6px;
+    align-self:flex-start;
+  }
+  .icon-btn{
+    width:30px;
+    height:30px;
+    border:2px solid var(--ink);
+    background:var(--paper);
+    cursor:pointer;
+    font-size:14px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+  }
+  .icon-btn:hover{background:var(--yellow);}
+  .custom-search{
+    display:none;
+    gap:8px;
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+  .custom-search input{min-width:160px; flex:1;}
+  .plan-text span{font-size:13.5px; color:#6b6e73;}
+  @media (max-width:760px){
+    .demo-grid{grid-template-columns:1fr; text-align:left;}
+    .arrow{transform:rotate(90deg); justify-self:start; margin:4px 0;}
+  }
+
+  /* BESCHIKBAARHEID */
+  .beschikbaarheid{
+    padding:0 0 76px;
+  }
+  .beschikbaarheid h2{
+    font-size:clamp(26px,3.4vw,34px);
+    margin:0 0 14px;
+  }
+  .lede2{
+    font-size:17px;
+    max-width:58ch;
+    color:#3a3d42;
+    margin:0 0 40px;
+  }
+  .avail-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:44px;
+    align-items:start;
+    margin-bottom:56px;
+  }
+  @media (max-width:760px){
+    .avail-grid{grid-template-columns:1fr;}
+  }
+  .share-box{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .share-input{flex:1; min-width:200px; cursor:text;}
+  .demo-note{font-style:italic;}
+
+  .avail-table{
+    border-collapse:collapse;
+    width:100%;
+    table-layout:fixed;
+  }
+  .avail-table th,.avail-table td{
+    border:2px solid var(--ink);
+    padding:10px 4px;
+    text-align:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;
+    font-weight:600;
+  }
+  .avail-table thead th{background:var(--paper);}
+  .avail-table tbody th{
+    text-align:left;
+    padding-left:10px;
+    font-weight:600;
+    background:var(--paper);
+  }
+  .avail-cell{
+    cursor:pointer;
+    background:var(--paper);
+    height:38px;
+  }
+  .avail-cell:hover{background:#e9e4d5;}
+  .avail-cell.selected{
+    background:var(--blue);
+  }
+
+  .result-preview .avail-table{max-width:560px;}
+  .result-table td{color:var(--ink);}
+  .lvl0{background:var(--paper);}
+  .lvl1{background:#D9E6F7;}
+  .lvl2{background:#B0CCEF;}
+  .lvl3{background:#6FA0DE; color:var(--paper);}
+  .lvl4{background:var(--blue); color:var(--paper);}
+  .result-table td.best{
+    outline:3px solid var(--red);
+    outline-offset:-3px;
+    position:relative;
+  }
+  .result-text{
+    margin-top:16px;
+    font-size:15px;
+  }
+
+  /* AUDIENCE */
+  .audience{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border-top:var(--line) solid var(--ink);
+    border-bottom:var(--line) solid var(--ink);
+  }
+  .aud-card{
+    padding:56px 40px;
+    color:var(--paper);
+  }
+  .aud-card:first-child{
+    background:var(--red);
+    border-right:var(--line) solid var(--ink);
+  }
+  .aud-card:last-child{background:var(--blue);}
+  .aud-card h3{
+    font-size:24px;
+    margin:0 0 14px;
+  }
+  .aud-card p{
+    margin:0;
+    font-size:16px;
+    max-width:38ch;
+    opacity:0.94;
+  }
+  @media (max-width:760px){
+    .audience{grid-template-columns:1fr;}
+    .aud-card:first-child{border-right:none; border-bottom:var(--line) solid var(--ink);}
+  }
+
+  /* STEPS */
+  .steps{padding:76px 0;}
+  .steps h2{
+    font-size:clamp(26px,3.4vw,34px);
+    margin:0 0 40px;
+  }
+  .steps-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:0;
+    border-top:var(--line) solid var(--ink);
+  }
+  .step{
+    padding:28px 26px 8px;
+    border-right:2px solid var(--ink);
+  }
+  .step:last-child{border-right:none;}
+  .step-num{
+    font-size:34px;
+    font-weight:700;
+    color:var(--red);
+    display:block;
+    margin-bottom:10px;
+  }
+  .step h4{
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    font-weight:600;
+    margin:0 0 8px;
+  }
+  .step p{
+    font-size:14.5px;
+    color:#54575c;
+    margin:0;
+  }
+  @media (max-width:760px){
+    .steps-grid{grid-template-columns:1fr;}
+    .step{border-right:none; border-bottom:2px solid var(--ink); padding-bottom:24px;}
+    .step:last-child{border-bottom:none;}
+  }
+
+  /* FINAL CTA */
+  .final{
+    background:#FFFFFF;
+    color:var(--ink);
+    padding:80px 0;
+    border-top:var(--line) solid var(--ink);
+    border-bottom:var(--line) solid var(--ink);
+  }
+  .final h2{
+    font-size:clamp(28px,4vw,40px);
+    margin:0 0 20px;
+    max-width:16ch;
+  }
+  .final form.signup{border-color:var(--ink);}
+  .final form.signup input{background:var(--paper); color:var(--ink);}
+  .final form.signup input::placeholder{color:#8a8d92;}
+  .final form.signup button{border-left-color:var(--ink);}
+  .final .microcopy{color:#54575c;}
+  .final .thanks{border-color:var(--ink); color:var(--ink); background:var(--paper);}
+
+  /* FOOTER */
+  footer{padding:36px 0 50px;}
+  footer .wrap{
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    font-size:13.5px;
+    color:#6b6e73;
+  }
+
+  @media (max-width:900px){
+    .hero .wrap{grid-template-columns:1fr; gap:36px;}
+    .deco{max-width:340px; margin:0 auto;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="wrap">
+  <div class="wordmark">Uit<span>je</span></div>
+  <a class="nav-btn" href="#wachtlijst">Wachtlijst</a>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Wat gaan we vandaag doen?</h1>
+      <p class="lede">Typ in waar je zin in hebt — Uitje zet er een compleet plan tegenover. Voor je date, of de hele vriendengroep. Geen lijstje met ideeën, gewoon een avond die klopt.</p>
+      <p class="hero-cta-hint">Vul hieronder je wensen in en zie meteen een voorbeeldplan &#8595;</p>
+    </div>
+
+    <div class="deco" role="img" aria-label="Abstracte compositie van kleurblokken in rood, geel en blauw">
+      <div class="b1"></div>
+      <div class="b2"></div>
+      <div class="b3"></div>
+      <div class="b4"></div>
+      <div class="b5"></div>
+    </div>
+  </div>
+</header>
+
+<section class="demo">
+  <div class="wrap">
+    <h2>Zo werkt het</h2>
+    <div class="demo-grid">
+      <div>
+        <p class="demo-col-label">Jij vult in</p>
+        <div class="chips-form">
+          <div class="chip-field">
+            <label for="party-size" class="chip-label">Met hoeveel personen ga je?</label>
+            <div class="stepper">
+              <button type="button" class="step-btn" aria-label="Eén persoon minder" onclick="adjustParty(-1)">&#8722;</button>
+              <input type="number" id="party-size" min="1" max="30" value="2" inputmode="numeric" oninput="updateDemo()">
+              <button type="button" class="step-btn" aria-label="Eén persoon meer" onclick="adjustParty(1)">&#43;</button>
+            </div>
+          </div>
+          <div class="chip-field">
+            <label class="sr-only" for="sel-stad" style="position:absolute;left:-9999px;">Stad</label>
+            <select id="sel-stad" class="chip-select" onchange="updateDemo()">
+              <option value="Amsterdam">Amsterdam</option>
+              <option value="Rotterdam">Rotterdam</option>
+              <option value="Den Haag">Den Haag</option>
+              <option value="Utrecht">Utrecht</option>
+              <option value="Eindhoven">Eindhoven</option>
+              <option value="Groningen">Groningen</option>
+              <option value="Tilburg">Tilburg</option>
+              <option value="Almere">Almere</option>
+              <option value="Breda">Breda</option>
+              <option value="Nijmegen">Nijmegen</option>
+              <option value="Haarlem">Haarlem</option>
+              <option value="Arnhem">Arnhem</option>
+              <option value="anders">Anders, namelijk&#8230;</option>
+            </select>
+            <input type="text" id="stad-anders" class="chip-input" placeholder="Vul je stad in" style="display:none" oninput="updateDemo()">
+          </div>
+          <div class="chip-field">
+            <label class="sr-only" for="sel-budget" style="position:absolute;left:-9999px;">Budget</label>
+            <select id="sel-budget" class="chip-select" onchange="updateDemo()">
+              <option value="&euro;15 p.p.">tot &euro;15 p.p.</option>
+              <option value="&euro;25 p.p." selected>rond &euro;25 p.p.</option>
+              <option value="&euro;40 p.p.">rond &euro;40 p.p.</option>
+              <option value="&euro;60 p.p.">rond &euro;60 p.p.</option>
+              <option value="geen vast budget">geen vast budget</option>
+            </select>
+          </div>
+          <div class="chip-field">
+            <label class="sr-only" for="sel-sfeer" style="position:absolute;left:-9999px;">Sfeer</label>
+            <select id="sel-sfeer" class="chip-select" onchange="updateDemo()">
+              <option value="gezellig" selected>gezellig</option>
+              <option value="romantisch">romantisch</option>
+              <option value="avontuurlijk">avontuurlijk</option>
+              <option value="chill">chill</option>
+              <option value="actief">actief</option>
+            </select>
+          </div>
+          <div class="chip-field">
+            <label class="sr-only" for="sel-moment" style="position:absolute;left:-9999px;">Moment</label>
+            <select id="sel-moment" class="chip-select" onchange="updateDemo()">
+              <option value="vanavond" selected>vanavond</option>
+              <option value="dit weekend">dit weekend</option>
+              <option value="volgende week">volgende week</option>
+            </select>
+          </div>
+          <div class="chip-field">
+            <label class="sr-only" for="sel-aantal" style="position:absolute;left:-9999px;">Aantal activiteiten</label>
+            <select id="sel-aantal" class="chip-select" onchange="updateDemo()">
+              <option value="2">2 activiteiten</option>
+              <option value="3" selected>3 activiteiten</option>
+              <option value="4">4 activiteiten</option>
+              <option value="5">5 activiteiten</option>
+            </select>
+          </div>
+          <div class="chip-field">
+            <label class="sr-only" for="sel-vervoer" style="position:absolute;left:-9999px;">Vervoer</label>
+            <select id="sel-vervoer" class="chip-select" onchange="updateDemo()">
+              <option value="lopend" selected>lopend</option>
+              <option value="fiets">op de fiets</option>
+              <option value="auto">met de auto</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="arrow" aria-hidden="true">&#8594;</div>
+      <div>
+        <p class="demo-col-label">Uitje stelt voor</p>
+        <div class="plan-card">
+          <p class="plan-summary" id="plan-summary">Voor 2 personen in Amsterdam</p>
+          <div id="plan-rows"></div>
+        </div>
+        <div class="share-box" style="margin-top:14px;">
+          <button type="button" class="nav-btn" onclick="fetchRealPlaces()">Zoek echte locaties op Google Maps</button>
+        </div>
+        <p class="microcopy" id="places-status">Nog niet gezocht &#8212; dit zijn voorbeeldnamen.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band-yellow">
+  <div class="wrap inner">
+    <h2>Je kent de appgroep wel</h2>
+    <p>&#8220;Iemand een idee?&#8221; &#8212; &#8220;Geen idee, wat wil jij?&#8221; &#8212; &#8220;Maakt mij niet uit.&#8221; Drie dagen later heeft niemand iets voorgesteld en blijft iedereen toch maar thuis. Uitje breekt die cirkel: iemand vult in wat jullie zoeken, en er ligt een plan.</p>
+  </div>
+</section>
+
+<section class="beschikbaarheid">
+  <div class="wrap">
+    <h2>Wanneer kan iedereen?</h2>
+    <p class="lede2">Zodra je weet met hoeveel personen je gaat, deel je &eacute;&eacute;n linkje. Iedereen vult in wanneer het uitkomt &#8212; geen appjes meer nodig.</p>
+    <a class="nav-btn" href="./uitje-plan.html">Beschikbaarheid checken &#8594;</a>
+  </div>
+</section>
+
+<section class="audience">
+  <div class="aud-card">
+    <h3>Voor je date</h3>
+    <p>Van eerste afspraakje tot jubileum. Geen half uur scrollen op zoek naar &#8216;iets leuks&#8217; &#8212; gewoon een avond die past bij jullie twee&euro;.</p>
+  </div>
+  <div class="aud-card">
+    <h3>Voor de vriendengroep</h3>
+    <p>Plan een avond of dagje uit zonder twintig appjes vooraf. Eén voorstel, iedereen stemt, klaar.</p>
+  </div>
+</section>
+
+<section class="steps">
+  <div class="wrap">
+    <h2>Drie stappen</h2>
+    <div class="steps-grid">
+      <div class="step">
+        <span class="step-num">1</span>
+        <h4>Vertel wat je zoekt</h4>
+        <p>Locatie, budget, sfeer en met wie je erop uit wilt.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <h4>Uitje stelt een plan voor</h4>
+        <p>Een compleet, uitvoerbaar plan &#8212; geen losse ideetjes.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <h4>Ga erop uit</h4>
+        <p>Of vraag in één tik een ander voorstel.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <h2>Wees erbij vanaf dag één</h2>
+    <div class="form-block">
+      <form class="signup" onsubmit="return handleSignup(event, 'thanks-final')">
+        <label class="sr-only" for="email-final" style="position:absolute;left:-9999px;">E-mailadres</label>
+        <input id="email-final" type="email" placeholder="jij@voorbeeld.nl" required>
+        <button type="submit">Zet me op de lijst</button>
+      </form>
+      <div class="thanks" id="thanks-final">Staat genoteerd. Je hoort van ons zodra Uitje live gaat.</div>
+      <p class="microcopy">Geen spam &#8212; één berichtje als we starten.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Uitje bestaat nog niet. Deze pagina is er om te zien of jullie &#8217;m willen.</span>
+    <span>&copy; 2026 Uitje</span>
+  </div>
+</footer>
+
+<script>
+  // ===== SUPABASE CONFIG =====
+  // Vul hier je eigen gegevens in (Supabase dashboard > Settings > API).
+  // Zolang deze op 'VUL-IN...' staan, werkt de link nog niet echt.
+  var SUPABASE_URL = 'https://bnbgceutzjypumstzdri.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_ZMe6lfs6wx1E2EapJeT5QA_GDIbN6r7';
+  var SUPABASE_READY = SUPABASE_URL.indexOf('VUL-IN') === -1 && SUPABASE_ANON_KEY.indexOf('VUL-IN') === -1;
+
+  // ===== GOOGLE MAPS CONFIG =====
+  // Vul hier je eigen Google Maps API-sleutel in (Places API (New) moet aanstaan).
+  var GOOGLE_MAPS_API_KEY = 'AIzaSyBb8_rzymE_uPLJhr3IKsSreEljUCW_zeI';
+  var GOOGLE_MAPS_READY = GOOGLE_MAPS_API_KEY.indexOf('VUL-IN') === -1;
+
+  var placeQueryMap = {
+    gezellig:     ["gezellig caf\u00e9", "informeel restaurant", "leuke wandelroute", "ijssalon", "bar voor een laatste drankje"],
+    romantisch:   ["rustige wijnbar", "romantisch restaurant", "wandelpad aan het water", "dessertbar", "rooftopbar"],
+    avontuurlijk: ["verrassende bar", "bijzonder restaurant", "avontuurlijke activiteit", "bijzondere ijssalon", "hippe cocktailbar"],
+    chill:        ["rustig caf\u00e9", "ontspannen restaurant", "rustige wandelroute", "gezellige dessertzaak", "chille bar"],
+    actief:       ["bowlingbaan of minigolf", "snelle eetgelegenheid", "buitenactiviteit", "milkshakebar", "sportbar"]
+  };
+
+  var vervoerMap = {
+    lopend: { label: 'lopen',   factor: 1 },
+    fiets:  { label: 'fietsen', factor: 0.4 },
+    auto:   { label: 'rijden',  factor: 0.25 }
+  };
+  var transferBasePattern = [12, 9, 14, 7]; // basistijd lopend, cyclisch per tussenstap
+
+  var sfeerMap = {
+    gezellig:     ["Borrel bij een gezellig caf\u00e9", "Diner, klein en informeel", "Avondwandeling", "Dessert bij een ijssalon", "Nog een drankje toe"],
+    romantisch:   ["Wijntje op een rustig terras", "Diner voor twee, kaarslicht", "Rustige wandeling langs het water", "Dessert delen bij een klein tentje", "Laatste drankje onder de sterren"],
+    avontuurlijk: ["Verrassende borrel op een onbekende plek", "Streetfood of een nieuw restaurant", "Nachtelijke ontdekkingstocht", "Onverwacht toetje ergens anders", "Nog ergens binnenwippen"],
+    chill:        ["Rustige borrel om bij te kletsen", "Ontspannen diner, geen haast", "Rustig terugwandelen", "Toetje bij een gezellig tentje", "Nog even blijven hangen"],
+    actief:       ["Bowling of minigolf om los te komen", "Snel en lekker eten tussendoor", "Actieve afsluiter buiten", "Energiek toetje onderweg", "Nog een activiteit erbij"]
+  };
+
+  var momentStart = {
+    "vanavond":      "18:30",
+    "dit weekend":   "14:00",
+    "volgende week": "19:00"
+  };
+  var gapPattern = [75, 90, 60, 75]; // minuten tussen start van elke activiteit, cyclisch
+
+  function genTimes(startStr, count){
+    var parts = startStr.split(':');
+    var mins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+    var times = [];
+    for (var i = 0; i < count; i++){
+      if (i > 0) mins += gapPattern[(i - 1) % gapPattern.length];
+      var h = Math.floor((mins / 60) % 24);
+      var m = mins % 60;
+      times.push((h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m);
+    }
+    return times;
+  }
+
+  var ICON_DICE = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="1.4" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.4" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg>';
+  var ICON_SEARCH = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><line x1="15" y1="15" x2="20" y2="20"/></svg>';
+
+  function buildPlanRowHTML(index){
+    return '' +
+      '<div class="plan-row">' +
+        '<div class="plan-time" id="plan-time-' + index + '">--:--</div>' +
+        '<div class="plan-text">' +
+          '<a class="plan-title-link" id="plan-title-' + index + '" href="#" target="_blank" rel="noopener"></a>' +
+          '<span id="plan-sub-' + index + '"></span>' +
+          '<div class="custom-search" id="custom-search-' + index + '">' +
+            '<input type="text" id="custom-query-' + index + '" class="chip-input" placeholder="Typ je eigen activiteit">' +
+            '<button type="button" class="nav-btn" onclick="searchAndUpdateRow(' + index + ', document.getElementById(\'custom-query-' + index + '\').value.trim())">Zoek</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="plan-actions">' +
+          '<button type="button" class="icon-btn" title="Willekeurige activiteit" aria-label="Willekeurige activiteit" onclick="randomizeActivity(' + index + ')">' + ICON_DICE + '</button>' +
+          '<button type="button" class="icon-btn" title="Zelf invullen" aria-label="Zelf invullen en zoeken op Google Maps" onclick="toggleCustomSearch(' + index + ')">' + ICON_SEARCH + '</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderPlanRows(count){
+    var container = document.getElementById('plan-rows');
+    if (!container) return;
+    var html = '';
+    for (var i = 1; i <= count; i++){
+      html += buildPlanRowHTML(i);
+      if (i < count){
+        html += '<div class="plan-transfer" id="transfer-' + i + '">-- min lopen</div>';
+      }
+    }
+    container.innerHTML = html;
+  }
+
+  var activityCount = 3; // huidig aantal gerenderde activiteiten
+
+  function updateDemo(){
+    var partyInput = document.getElementById('party-size');
+    var party = parseInt(partyInput.value, 10) || 1;
+    var personenLabel = party === 1 ? '1 persoon' : party + ' personen';
+
+    var stadSel = document.getElementById('sel-stad');
+    var stadAnders = document.getElementById('stad-anders');
+    var isAnders = stadSel.value === 'anders';
+    stadAnders.style.display = isAnders ? 'block' : 'none';
+    var stad = isAnders ? (stadAnders.value.trim() || 'jouw stad') : stadSel.value;
+
+    var budgetSel = document.getElementById('sel-budget');
+    var budgetLabel = budgetSel.options[budgetSel.selectedIndex].text;
+
+    var sfeer = document.getElementById('sel-sfeer').value;
+    var moment = document.getElementById('sel-moment').value;
+    var aantalSel = document.getElementById('sel-aantal');
+    var aantal = aantalSel ? (parseInt(aantalSel.value, 10) || 3) : 3;
+    activityCount = aantal;
+
+    var titels = sfeerMap[sfeer] || sfeerMap.gezellig;
+    var tijden = genTimes(momentStart[moment] || momentStart.vanavond, aantal);
+
+    document.getElementById('plan-summary').textContent = 'Voor ' + personenLabel + ' in ' + stad;
+
+    renderPlanRows(aantal);
+
+    for (var i = 1; i <= aantal; i++){
+      var titleLink = document.getElementById('plan-title-' + i);
+      titleLink.textContent = titels[(i - 1) % titels.length];
+      titleLink.href = '#';
+      document.getElementById('plan-time-' + i).textContent = tijden[i - 1];
+
+      var subEl = document.getElementById('plan-sub-' + i);
+      if (i === 1) subEl.textContent = stad + ' \u2014 vlakbij, geen wachtrij';
+      else if (i === 2) subEl.textContent = 'Binnen ' + budgetLabel + ', ' + stad;
+      else if (i === aantal) subEl.textContent = 'Rustig afsluiten, geen reservering nodig';
+      else subEl.textContent = stad;
+    }
+
+    var placesStatus = document.getElementById('places-status');
+    if (placesStatus) placesStatus.textContent = 'Nog niet gezocht \u2014 dit zijn voorbeeldnamen.';
+
+    var shareNote = document.getElementById('share-note');
+    if (shareNote) {
+      var others = Math.max(party - 1, 1);
+      var othersLabel = others === 1 ? '1 andere persoon' : others + ' andere personen';
+      shareNote.textContent = 'Deel dit met de ' + othersLabel + ' waarmee je gaat.';
+    }
+
+    var vervoerSel = document.getElementById('sel-vervoer');
+    var vervoer = vervoerSel ? vervoerSel.value : 'lopend';
+    var vInfo = vervoerMap[vervoer] || vervoerMap.lopend;
+    for (var t = 1; t < aantal; t++){
+      var transferEl = document.getElementById('transfer-' + t);
+      if (transferEl){
+        var mins = Math.max(1, Math.round(transferBasePattern[(t - 1) % transferBasePattern.length] * vInfo.factor));
+        transferEl.textContent = mins + ' min ' + vInfo.label;
+      }
+    }
+  }
+
+  function adjustParty(delta){
+    var input = document.getElementById('party-size');
+    var val = parseInt(input.value, 10) || 1;
+    val = Math.min(30, Math.max(1, val + delta));
+    input.value = val;
+    updateDemo();
+  }
+
+  async function handleSignup(e, thanksId){
+    e.preventDefault();
+    var form = e.target;
+    var thanks = document.getElementById(thanksId);
+    var emailInput = form.querySelector('input[type="email"]');
+    var email = emailInput ? emailInput.value.trim() : '';
+
+    if (SUPABASE_READY && email){
+      try {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/waitlist', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ email: email })
+        });
+        if (!res.ok){
+          var errText = await res.text();
+          console.error('Supabase fout bij wachtlijst:', res.status, errText);
+        }
+      } catch (err){
+        console.error('Kon e-mail niet opslaan in wachtlijst:', err);
+      }
+    }
+
+    form.style.display = 'none';
+    thanks.style.display = 'block';
+    return false;
+  }
+
+
+  async function searchPlace(query){
+    var res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
+        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.currentOpeningHours.openNow,places.googleMapsUri'
+      },
+      body: JSON.stringify({ textQuery: query, languageCode: 'nl' })
+    });
+    if (!res.ok){
+      var errText = await res.text();
+      throw new Error('Google Maps fout (' + res.status + '): ' + errText);
+    }
+    var data = await res.json();
+    return (data.places && data.places.length > 0) ? data.places[0] : null;
+  }
+
+  async function fetchRealPlaces(){
+    var statusEl = document.getElementById('places-status');
+    if (!GOOGLE_MAPS_READY){
+      if (statusEl) statusEl.textContent = 'Nog niet gekoppeld aan Google Maps \u2014 vul de API-sleutel in de code in.';
+      return;
+    }
+
+    var stadSel = document.getElementById('sel-stad');
+    var stadAnders = document.getElementById('stad-anders');
+    var stad = (stadSel.value === 'anders') ? (stadAnders.value.trim() || 'Amsterdam') : stadSel.value;
+    var sfeer = document.getElementById('sel-sfeer').value;
+    var queries = placeQueryMap[sfeer] || placeQueryMap.gezellig;
+
+    if (statusEl) statusEl.textContent = 'Bezig met zoeken op Google Maps\u2026';
+
+    try {
+      for (var i = 0; i < activityCount; i++){
+        await applyPlaceToRow(i + 1, queries[i % queries.length], stad);
+      }
+      if (statusEl) statusEl.textContent = 'Bijgewerkt met actuele locaties en openingstijden van Google Maps.';
+    } catch (err){
+      console.error('Kon locaties niet ophalen:', err);
+      if (statusEl) statusEl.textContent = err.message;
+    }
+  }
+
+  async function applyPlaceToRow(rowIndex, query, stad){
+    var place = await searchPlace(query + ' in ' + stad);
+    var titleEl = document.getElementById('plan-title-' + rowIndex);
+    var subEl = document.getElementById('plan-sub-' + rowIndex);
+
+    if (place){
+      var name = place.displayName ? place.displayName.text : query;
+      titleEl.textContent = name;
+      titleEl.href = place.googleMapsUri || '#';
+
+      var openStatus = '';
+      if (place.currentOpeningHours && typeof place.currentOpeningHours.openNow === 'boolean'){
+        openStatus = place.currentOpeningHours.openNow ? 'Nu open' : 'Nu gesloten';
+      }
+      subEl.textContent = [place.formattedAddress, openStatus].filter(Boolean).join(' \u2014 ');
+      return name;
+    } else {
+      titleEl.textContent = 'Geen resultaat gevonden voor: ' + query;
+      titleEl.href = '#';
+      subEl.textContent = '';
+      return null;
+    }
+  }
+
+  async function searchAndUpdateRow(rowIndex, query){
+    var statusEl = document.getElementById('places-status');
+    if (!GOOGLE_MAPS_READY){
+      if (statusEl) statusEl.textContent = 'Nog niet gekoppeld aan Google Maps \u2014 vul de API-sleutel in de code in.';
+      return;
+    }
+    if (!query){
+      if (statusEl) statusEl.textContent = 'Vul eerst een activiteit in om te zoeken.';
+      return;
+    }
+
+    var stadSel = document.getElementById('sel-stad');
+    var stadAnders = document.getElementById('stad-anders');
+    var stad = (stadSel.value === 'anders') ? (stadAnders.value.trim() || 'Amsterdam') : stadSel.value;
+
+    if (statusEl) statusEl.textContent = 'Bezig met zoeken op Google Maps\u2026';
+
+    try {
+      var name = await applyPlaceToRow(rowIndex, query, stad);
+      if (statusEl){
+        statusEl.textContent = name ? ('Bijgewerkt met "' + name + '" van Google Maps.') : 'Niks gevonden voor die zoekopdracht.';
+      }
+    } catch (err){
+      console.error('Kon locatie niet ophalen:', err);
+      if (statusEl) statusEl.textContent = err.message;
+    }
+  }
+
+  function toggleCustomSearch(rowIndex){
+    var box = document.getElementById('custom-search-' + rowIndex);
+    if (!box) return;
+    var isOpen = box.style.display === 'flex';
+    box.style.display = isOpen ? 'none' : 'flex';
+    if (!isOpen){
+      var input = document.getElementById('custom-query-' + rowIndex);
+      if (input) input.focus();
+    }
+  }
+
+  var randomActivityPool = {
+    1: ["Borrel bij een gezellig caf\u00e9", "Wijnproeverij bij een kleine bar", "Bier proeven bij een lokale brouwerij", "Cocktails bij een verstopt bartje", "Terrasje pakken in de zon", "Karaoke-avond bij een bar"],
+    2: ["Diner bij een verrassend restaurant", "Streetfood proeven op de markt", "Sushi-avond", "Tapas delen met elkaar", "Zelf pizza's bakken", "Foodtruckfestival langsgaan"],
+    3: ["Avondwandeling door de stad", "Bowlen met de groep", "Escape room doen", "Minigolfen", "Karaoke tot laat", "Vintage winkelen", "Rondje fietsen door de stad"],
+    4: ["Dessert bij een ijssalon", "Zoetigheid halen bij een banketbakker", "Kaasplankje erbij", "Nog een hapje bij een tweede tent", "Foto's maken bij een leuke plek"],
+    5: ["Nog een drankje toe", "Laatste rondje bij een nachtcaf\u00e9", "Frietje halen als afsluiter", "Rustig naar huis wandelen", "Dansen bij een leuke tent"]
+  };
+
+  function randomizeActivity(rowIndex){
+    var pool = randomActivityPool[rowIndex];
+    if (!pool) return;
+    var titleEl = document.getElementById('plan-title-' + rowIndex);
+    var subEl = document.getElementById('plan-sub-' + rowIndex);
+    var current = titleEl.textContent;
+
+    var choice = current;
+    if (pool.length > 1){
+      while (choice === current){
+        choice = pool[Math.floor(Math.random() * pool.length)];
+      }
+    } else {
+      choice = pool[0];
+    }
+
+    titleEl.textContent = choice;
+    titleEl.href = '#';
+    if (subEl) subEl.textContent = 'Willekeurig gekozen \u2014 klik op \u{1F50D} om een echte locatie te zoeken';
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    updateDemo();
+  });
+</script>
+
+</body>
+</html>
