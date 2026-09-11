@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Uitje &#8212; Stem op het plan</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/x-icon" href="./favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF8F3; --surface:#FFFFFF; --ink:#1A1A1F; --muted:#6B6B76;
+    --line-soft:#E8E3DA; --coral:#F4623A; --coral-soft:#FDEDE8; --green:#0E7C5A;
+    --amber:#F0B429; --radius-lg:20px; --radius-md:14px; --radius-pill:999px;
+    --shadow-sm:0 1px 2px rgba(26,26,31,.04), 0 2px 8px rgba(26,26,31,.04);
+    --shadow-md:0 2px 4px rgba(26,26,31,.04), 0 8px 24px rgba(26,26,31,.07);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth; color-scheme:light;}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:17px;
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.wordmark,.chip-select,.chip-input,.date-input{font-family:'Space Grotesk',sans-serif;}
+  a{color:inherit;}
+  button,a,select,input{transition:background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .12s ease;}
+  .wrap{max-width:820px;margin:0 auto;padding:0 24px;}
+  :focus-visible{outline:3px solid var(--coral);outline-offset:2px;}
+
+  nav.wrap{display:flex;align-items:center;justify-content:space-between;padding-top:22px;padding-bottom:14px;}
+  .wordmark{font-size:23px;font-weight:700;letter-spacing:-.02em;}
+  .wordmark span{color:var(--coral);}
+  .back-link{font-size:14.5px;font-weight:600;color:var(--muted);text-decoration:none;}
+  .back-link:hover{color:var(--coral);}
+
+  main{padding:24px 0 80px;}
+  h2{font-size:clamp(28px,4.2vw,38px);margin:0 0 12px;line-height:1.12;letter-spacing:-.025em;}
+  .lede2{font-size:17px;max-width:56ch;color:var(--muted);margin:0 0 40px;}
+  .demo-col-label{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 16px;}
+  .block{margin-bottom:44px;}
+  .card{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);
+    border:1px solid var(--line-soft);padding:24px 22px;}
+
+  .nav-btn{border:none;background:var(--coral);color:#fff;padding:11px 22px;font-size:15px;
+    font-weight:600;cursor:pointer;border-radius:var(--radius-pill);text-decoration:none;
+    display:inline-block;font-family:'Space Grotesk',sans-serif;box-shadow:var(--shadow-sm);}
+  .nav-btn:hover{background:#E04E27;transform:translateY(-1px);}
+  .nav-btn.ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--line-soft);}
+  .nav-btn.ghost:hover{background:var(--coral-soft);border-color:var(--coral);color:var(--coral);}
+
+  .share-box{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px;}
+  .chip-input,.chip-select,.date-input{
+    border:1.5px solid var(--line-soft);border-radius:var(--radius-md);padding:12px 14px;
+    font-size:15px;font-weight:600;background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm);}
+  .share-input{flex:1;min-width:200px;cursor:text;}
+  .microcopy{font-size:13.5px;color:var(--muted);margin:0 0 8px;}
+  .demo-note{font-style:italic;}
+
+  .field-row{margin-bottom:16px;max-width:280px;}
+  .field-row label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:7px;}
+  .field-row select,.field-row input{width:100%;}
+  .date-list{display:flex;flex-direction:column;gap:0;margin-bottom:20px;max-width:280px;}
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:10px;}
+  .date-chip{border:1.5px solid var(--line-soft);background:var(--surface);color:var(--ink);
+    padding:14px 20px;border-radius:var(--radius-md);font-family:'Space Grotesk',sans-serif;
+    font-weight:600;font-size:15px;cursor:pointer;box-shadow:var(--shadow-sm);}
+  .date-chip:hover{border-color:var(--coral);background:var(--coral-soft);}
+  .date-chip.selected{background:var(--coral);color:#fff;border-color:var(--coral);}
+
+  .result-chip{border:1.5px solid var(--line-soft);border-radius:var(--radius-md);padding:14px 18px;
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px;min-width:110px;
+    text-align:center;background:var(--surface);box-shadow:var(--shadow-sm);}
+  .result-chip .count{display:block;font-size:22px;margin-top:6px;font-weight:700;}
+  .lvl0{color:var(--muted);}
+  .lvl1{background:#FDEDE8;}
+  .lvl2{background:#FBD9CE;}
+  .lvl3{background:#F79274;color:#fff;border-color:#F79274;}
+  .lvl4{background:var(--coral);color:#fff;border-color:var(--coral);}
+  .result-chip.best{box-shadow:0 0 0 3px var(--coral);}
+  .result-text{margin-top:18px;font-size:15.5px;}
+  .tijdstip-note{font-size:14.5px;color:var(--muted);margin:0 0 18px;}
+
+  .option-cards{display:flex;flex-direction:column;gap:14px;}
+  .option-card{border:1.5px solid var(--line-soft);border-radius:var(--radius-lg);padding:20px 22px;
+    cursor:pointer;background:var(--surface);box-shadow:var(--shadow-sm);}
+  .option-card:hover{border-color:var(--coral);}
+  .option-card.selected{border-color:var(--coral);background:var(--coral-soft);}
+  .option-card h3{font-size:17px;margin:0 0 10px;}
+  .option-card ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--muted);}
+  .option-card li{margin-bottom:4px;}
+
+  .result-card{border:1.5px solid var(--line-soft);border-radius:var(--radius-md);padding:16px 20px;
+    margin-bottom:12px;background:var(--surface);box-shadow:var(--shadow-sm);}
+  .result-card.best{border-color:var(--coral);box-shadow:0 0 0 2px var(--coral-soft);}
+  .result-card h3{font-size:16px;margin:0 0 10px;display:flex;justify-content:space-between;}
+  .result-bar-track{background:var(--line-soft);height:8px;border-radius:var(--radius-pill);overflow:hidden;}
+  .result-bar-fill{background:var(--coral);height:100%;width:0%;transition:width .3s ease;}
+
+  footer{padding:28px 0 44px;border-top:1px solid var(--line-soft);}
+  footer .wrap{font-size:13.5px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<nav class="wrap">
+  <div class="wordmark">Uit<span>je.</span></div>
+  <a class="back-link" href="./index.html">&#8592; Terug</a>
+</nav>
+
+<main class="wrap">
+  <h2>Stem op het plan</h2>
+  <p class="lede2">Deel &eacute;&eacute;n linkje, iedereen stemt op hun favoriete plan, en de winnaar gaat door naar het datumprikken.</p>
+
+  <!-- SETUP: alleen zichtbaar voordat er een linkje bestaat -->
+  <div class="block" id="setup-block">
+    <p class="demo-col-label">Opties genereren</p>
+
+    <div class="field-row">
+      <label for="setup-stad">Stad</label>
+      <select id="setup-stad" class="chip-select">
+        <option value="Amsterdam">Amsterdam</option>
+        <option value="Rotterdam">Rotterdam</option>
+        <option value="Den Haag">Den Haag</option>
+        <option value="Utrecht">Utrecht</option>
+        <option value="Eindhoven">Eindhoven</option>
+        <option value="Groningen">Groningen</option>
+        <option value="Tilburg">Tilburg</option>
+        <option value="Almere">Almere</option>
+        <option value="Breda">Breda</option>
+        <option value="Nijmegen">Nijmegen</option>
+      </select>
+    </div>
+    <div class="field-row">
+      <label for="setup-budget">Budget</label>
+      <select id="setup-budget" class="chip-select">
+        <option value="15">tot &euro;15 p.p.</option>
+        <option value="25" selected>rond &euro;25 p.p.</option>
+        <option value="40">rond &euro;40 p.p.</option>
+        <option value="60">rond &euro;60 p.p.</option>
+        <option value="onbeperkt">geen vast budget</option>
+      </select>
+    </div>
+
+    <input type="text" name="website" id="hp-setup" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
+
+    <button type="button" class="nav-btn" onclick="createPollFromSetup()">Genereer 3 opties en maak linkje</button>
+    <p class="microcopy" id="setup-status" style="margin-top:10px;">Liever vanuit een eigen plan? <a href="./index.html#plannen" style="color:var(--coral);text-decoration:underline;">Maak eerst je Uitje</a>.</p>
+  </div>
+
+  <!-- JIJ DEELT -->
+  <div class="block" id="share-block" style="display:none;">
+    <p class="demo-col-label">Jij deelt</p>
+    <div class="share-box">
+      <input type="text" id="share-link" class="chip-input share-input" readonly value="">
+      <button type="button" class="nav-btn" onclick="copyShareLink()">Kopieer linkje</button>
+    </div>
+    <p class="microcopy" id="share-note">Deel dit met je groep.</p>
+    <p class="microcopy demo-note" id="setup-note" style="display:none;">Demo &#8212; dit linkje werkt nog niet echt totdat de Supabase-sleutel is ingevuld.</p>
+    <p class="microcopy"><a href="#" onclick="startNewPoll(); return false;" style="color:var(--blue); text-decoration:underline;">Nieuwe opties genereren</a></p>
+  </div>
+
+  <!-- ZIJ STEMMEN -->
+  <div class="block" id="respond-block" style="display:none;">
+    <p class="demo-col-label">Breng je stem uit</p>
+    <input type="text" id="resp-naam" class="chip-input" placeholder="Jouw naam" style="margin-bottom:14px;width:100%;max-width:240px;">
+    <input type="text" name="website" id="hp-resp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
+    <div class="option-cards" id="option-cards"></div>
+    <div class="share-box" style="margin-top:16px;">
+      <button type="button" class="nav-btn" onclick="submitVote()">Stem versturen</button>
+    </div>
+    <p class="microcopy" id="resp-status">Vul je naam in, kies je favoriete optie, en verstuur.</p>
+  </div>
+
+  <!-- NIET GEVONDEN -->
+  <div class="block" id="notfound-block" style="display:none;">
+    <div class="card">
+      <h3 style="margin:0 0 10px;">Deze stemming bestaat niet (meer)</h3>
+      <p style="margin:0 0 18px;color:var(--muted);">Het linkje klopt niet, of de stemming is verwijderd. Vraag degene die het deelde om een nieuw linkje.</p>
+      <a class="nav-btn" href="./uitje-stem.html">Zelf een stemming maken</a>
+    </div>
+  </div>
+
+  <!-- RESULTAAT -->
+  <div class="block" id="result-block" style="display:none;">
+    <div class="share-box" style="margin-bottom:10px;">
+      <p class="demo-col-label" style="margin:0;">Resultaat</p>
+      <button type="button" class="nav-btn" onclick="refreshResults()">Nu verversen</button>
+    </div>
+    <div id="result-cards"></div>
+    <p class="result-text" id="result-text"></p>
+    <div class="share-box" id="winner-box" style="display:none;margin-top:18px;">
+      <button type="button" class="nav-btn" id="winner-btn" onclick="useWinner()"></button>
+    </div>
+    <p class="microcopy" id="winner-status" style="margin-top:8px;"></p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">Onderdeel van Uitje. &middot; <a href="./privacy.html" style="color:inherit;text-decoration:underline;">Privacy</a></div>
+</footer>
+
+<script>
+  var SUPABASE_URL = 'https://bnbgceutzjypumstzdri.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_ZMe6lfs6wx1E2EapJeT5QA_GDIbN6r7';
+  var SUPABASE_READY = SUPABASE_URL.indexOf('VUL-IN') === -1 && SUPABASE_ANON_KEY.indexOf('VUL-IN') === -1;
+
+  var sfeerLabels = ["gezellig", "romantisch", "avontuurlijk", "chill", "actief"];
+
+  var sfeerMapMini = {
+    gezellig:     ["Borrel bij een gezellig caf\u00e9", "Diner, klein en informeel", "Avondwandeling"],
+    romantisch:   ["Wijntje op een rustig terras", "Diner voor twee, kaarslicht", "Rustige wandeling langs het water"],
+    avontuurlijk: ["Verrassende borrel op een onbekende plek", "Streetfood of een nieuw restaurant", "Nachtelijke ontdekkingstocht"],
+    chill:        ["Rustige borrel om bij te kletsen", "Ontspannen diner, geen haast", "Rustig terugwandelen"],
+    actief:       ["Bowling of minigolf om los te komen", "Snel en lekker eten tussendoor", "Actieve afsluiter buiten"]
+  };
+
+  var pollCode = null;
+  var pollOptions = [];
+  var pollContext = null;
+
+  function getPollCodeFromURL(){
+    var params = new URLSearchParams(window.location.search);
+    return params.get('poll');
+  }
+
+  function buildShareLink(code){
+    return window.location.origin + window.location.pathname + '?poll=' + code;
+  }
+
+  function showBlock(id, show){
+    var el = document.getElementById(id);
+    if (el) el.style.display = show ? 'block' : 'none';
+  }
+
+  function generateOptions(stad, budget){
+    var shuffled = sfeerLabels.slice().sort(function(){ return Math.random() - 0.5; });
+    var picks = shuffled.slice(0, 3);
+    return picks.map(function(sfeer){
+      var steps = sfeerMapMini[sfeer] || sfeerMapMini.gezellig;
+      return {
+        label: sfeer.charAt(0).toUpperCase() + sfeer.slice(1) + ' in ' + stad,
+        steps: steps
+      };
+    });
+  }
+
+  async function createPollFromSetup(){
+    var status = document.getElementById('setup-status');
+    var honeypot = document.getElementById('hp-setup');
+    if (honeypot && honeypot.value){
+      return; // bot
+    }
+
+    var stad = document.getElementById('setup-stad').value;
+    var budget = document.getElementById('setup-budget').value;
+    var options = generateOptions(stad, budget);
+
+    var chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+    var code = '';
+    for (var i = 0; i < 6; i++){
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    if (SUPABASE_READY){
+      try {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/option_polls', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ id: code, options: options, context: { stad: stad, budget: budget } })
+        });
+        if (!res.ok){
+          var errText = await res.text();
+          console.error('Supabase fout bij poll aanmaken:', res.status, errText);
+          if (status) status.textContent = 'Fout (' + res.status + '): ' + errText;
+          return;
+        }
+      } catch (err){
+        console.error('Kon poll niet aanmaken:', err);
+        if (status) status.textContent = 'Netwerkfout: ' + err.message;
+        return;
+      }
+    }
+
+    pollCode = code;
+    pollOptions = options;
+    pollContext = { stad: stad, budget: budget };
+    try { localStorage.setItem('uitje_eigen_poll_code', code); } catch (err) { /* no-op */ }
+
+    showBlock('setup-block', false);
+    showShareBlock();
+    showBlock('respond-block', true);
+    renderOptionCards();
+    renderResultCards();
+    refreshResults();
+  }
+
+  function showShareBlock(){
+    var link = document.getElementById('share-link');
+    if (link) link.value = buildShareLink(pollCode);
+    var setupNote = document.getElementById('setup-note');
+    if (setupNote) setupNote.style.display = SUPABASE_READY ? 'none' : 'block';
+    showBlock('share-block', true);
+    showBlock('result-block', true);
+  }
+
+  function startNewPoll(){
+    try { localStorage.removeItem('uitje_eigen_poll_code'); } catch (err) { /* no-op */ }
+    if (getPollCodeFromURL()){
+      window.location.href = window.location.origin + window.location.pathname;
+      return;
+    }
+    window.location.reload();
+  }
+
+  function copyShareLink(){
+    var link = document.getElementById('share-link');
+    if (!link) return;
+    var restore = function(btn, original){ setTimeout(function(){ btn.textContent = original; }, 1800); };
+    var btn = event ? event.target : null;
+    var originalLabel = btn ? btn.textContent : null;
+    function showCopied(){ if (btn){ btn.textContent = 'Gekopieerd!'; restore(btn, originalLabel); } }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link.value).then(showCopied).catch(function(){ fallbackCopy(link, showCopied); });
+    } else {
+      fallbackCopy(link, showCopied);
+    }
+  }
+
+  function fallbackCopy(input, onDone){
+    input.removeAttribute('readonly');
+    input.select();
+    input.setSelectionRange(0, 99999);
+    try { document.execCommand('copy'); } catch (err) { /* no-op */ }
+    input.setAttribute('readonly', 'readonly');
+    if (onDone) onDone();
+  }
+
+  async function fetchPollInfo(code){
+    if (!SUPABASE_READY) return null;
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/option_polls?id=eq.' + encodeURIComponent(code) + '&select=options,context', {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      });
+      var data = await res.json();
+      if (data && data.length > 0) return data[0];
+      return null;
+    } catch (err){
+      console.error('Kon poll niet ophalen:', err);
+      return null;
+    }
+  }
+
+  var selectedChoice = null;
+
+  function hasAlreadyVoted(){
+    try { return localStorage.getItem('uitje_gestemd_' + pollCode) === '1'; }
+    catch (err) { return false; }
+  }
+
+  function markAlreadyVoted(){
+    var block = document.getElementById('respond-block');
+    if (!block) return;
+    var cards = document.getElementById('option-cards');
+    var naamInput = document.getElementById('resp-naam');
+    var btn = block.querySelector('button.nav-btn');
+    if (cards){ cards.style.opacity = '.5'; cards.style.pointerEvents = 'none'; }
+    if (naamInput) naamInput.disabled = true;
+    if (btn){
+      btn.textContent = 'Al gestemd';
+      btn.disabled = true;
+      btn.style.opacity = '.5';
+      btn.style.cursor = 'default';
+    }
+    var status = document.getElementById('resp-status');
+    if (status) status.innerHTML = 'Je hebt al gestemd. <a href="#" onclick="resetMyVote(); return false;" style="color:var(--coral);text-decoration:underline;">Opnieuw stemmen</a>';
+  }
+
+  function resetMyVote(){
+    try { localStorage.removeItem('uitje_gestemd_' + pollCode); } catch (err) { /* no-op */ }
+    window.location.reload();
+  }
+
+  function renderOptionCards(){
+    var container = document.getElementById('option-cards');
+    if (!container) return;
+    var html = '';
+    pollOptions.forEach(function(opt, idx){
+      var inner = '';
+      if (opt.items && opt.items.length){
+        inner = '<ul>' + opt.items.map(function(it){
+          return '<li><strong style="font-weight:600;color:var(--ink);">' + (it.tijd ? it.tijd + ' \u00b7 ' : '') + '</strong>' + it.titel + '</li>';
+        }).join('') + '</ul>';
+      } else if (opt.steps){
+        inner = '<ul>' + opt.steps.map(function(s){ return '<li>' + s + '</li>'; }).join('') + '</ul>';
+      }
+      html += '<div class="option-card" data-choice="' + idx + '" onclick="selectOption(' + idx + ')">' +
+        '<h3>' + opt.label + '</h3>' + inner + '</div>';
+    });
+    container.innerHTML = html;
+
+    if (hasAlreadyVoted()) markAlreadyVoted();
+  }
+
+  function selectOption(idx){
+    selectedChoice = idx;
+    document.querySelectorAll('.option-card').forEach(function(card){
+      card.classList.toggle('selected', parseInt(card.getAttribute('data-choice'), 10) === idx);
+    });
+  }
+
+  async function submitVote(){
+    var status = document.getElementById('resp-status');
+    var naam = (document.getElementById('resp-naam').value || '').trim();
+    var honeypot = document.getElementById('hp-resp');
+
+    if (honeypot && honeypot.value){
+      if (status) status.textContent = 'Bedankt! Je stem is opgeslagen.';
+      return;
+    }
+    if (!naam){
+      if (status) status.textContent = 'Vul eerst je naam in.';
+      return;
+    }
+    if (selectedChoice === null){
+      if (status) status.textContent = 'Kies eerst een optie.';
+      return;
+    }
+    if (!SUPABASE_READY){
+      if (status) status.textContent = 'Nog niet gekoppeld aan Supabase \u2014 dit is nog een demo.';
+      return;
+    }
+    if (!pollCode){
+      if (status) status.textContent = 'Geen stemming gevonden.';
+      return;
+    }
+
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/option_votes', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ poll_id: pollCode, naam: naam, choice: selectedChoice })
+      });
+      if (!res.ok){
+        var errText = await res.text();
+        console.error('Supabase fout bij stemmen:', res.status, errText);
+        if (status) status.textContent = 'Fout (' + res.status + '): ' + errText;
+        return;
+      }
+      if (status) status.textContent = 'Bedankt ' + naam + '! Je stem is opgeslagen.';
+      try { localStorage.setItem('uitje_gestemd_' + pollCode, '1'); } catch (err) { /* no-op */ }
+      markAlreadyVoted();
+      refreshResults();
+    } catch (err){
+      console.error('Kon stem niet opslaan:', err);
+      if (status) status.textContent = 'Netwerkfout: ' + err.message;
+    }
+  }
+
+  function renderResultCards(){
+    var container = document.getElementById('result-cards');
+    if (!container) return;
+    var html = '';
+    pollOptions.forEach(function(opt, idx){
+      html += '<div class="result-card" id="result-card-' + idx + '">' +
+        '<h3><span>' + opt.label + '</span><span id="result-count-' + idx + '">0</span></h3>' +
+        '<div class="result-bar-track"><div class="result-bar-fill" id="result-bar-' + idx + '"></div></div>' +
+        '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  async function refreshResults(){
+    var resultText = document.getElementById('result-text');
+    if (!SUPABASE_READY){
+      if (resultText) resultText.innerHTML = '<strong>Nog niet gekoppeld</strong> &#8212; vul de Supabase-gegevens in de code in.';
+      return;
+    }
+    if (!pollCode || pollOptions.length === 0){
+      if (resultText) resultText.textContent = 'Nog geen stemming gevonden.';
+      return;
+    }
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/option_votes?poll_id=eq.' + encodeURIComponent(pollCode) + '&select=choice', {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      });
+      var data = await res.json();
+      var total = data.length;
+      var counts = [0, 0, 0];
+      data.forEach(function(r){
+        if (typeof r.choice === 'number' && counts[r.choice] !== undefined) counts[r.choice]++;
+      });
+
+      var bestIdx = 0;
+      pollOptions.forEach(function(opt, idx){
+        if (counts[idx] > counts[bestIdx]) bestIdx = idx;
+        var pct = total > 0 ? Math.round((counts[idx] / total) * 100) : 0;
+        var countEl = document.getElementById('result-count-' + idx);
+        var barEl = document.getElementById('result-bar-' + idx);
+        var cardEl = document.getElementById('result-card-' + idx);
+        if (countEl) countEl.textContent = counts[idx];
+        if (barEl) barEl.style.width = pct + '%';
+        if (cardEl) cardEl.classList.remove('best');
+      });
+      if (total > 0){
+        var bestCard = document.getElementById('result-card-' + bestIdx);
+        if (bestCard) bestCard.classList.add('best');
+      }
+
+      if (resultText){
+        if (total === 0){
+          resultText.innerHTML = '<strong>Nog geen stemmen</strong> &#8212; deel het linkje om stemmen te verzamelen.';
+        } else {
+          resultText.innerHTML = '<strong>Winnaar: ' + pollOptions[bestIdx].label + '</strong> \u2014 ' + counts[bestIdx] + ' van de ' + total + ' stemmen';
+          // Alleen de organisator kan de winnaar vastzetten als het definitieve plan.
+          var winBox = document.getElementById('winner-box');
+          var winBtn = document.getElementById('winner-btn');
+          if (winBox && winBtn && !getPollCodeFromURL()){
+            winBtn.setAttribute('data-idx', bestIdx);
+            winBtn.textContent = 'Ga verder met: ' + pollOptions[bestIdx].label;
+            winBox.style.display = 'flex';
+          }
+        }
+      }
+    } catch (err){
+      console.error('Kon resultaten niet ophalen:', err);
+      if (resultText) resultText.textContent = 'Kon resultaten niet ophalen.';
+    }
+  }
+
+  function useWinner(){
+    var idx = parseInt(document.getElementById('winner-btn').getAttribute('data-idx'), 10);
+    var winner = pollOptions[idx];
+    if (!winner) return;
+
+    var ctx = pollContext || {};
+    var plan = {
+      stad: ctx.stad || '',
+      personen: ctx.personen || 1,
+      sfeer: winner.sfeer || 'gezellig',
+      dagdeel: ctx.dagdeel || 'avond',
+      vervoer: ctx.vervoer || 'lopend',
+      budget: ctx.budget || '',
+      thema: null,
+      items: winner.items || (winner.steps || []).map(function(s, i){
+        return { tijd: '', titel: s, sub: '', adres: null, link: null };
+      })
+    };
+
+    try {
+      localStorage.setItem('uitje_bevestigd_plan', JSON.stringify(plan));
+      // Oude datumprikker opruimen: dit is een nieuw plan, dus ook een nieuwe stemming over datums.
+      localStorage.removeItem('uitje_eigen_plan_code');
+    } catch (err) { /* no-op */ }
+    window.location.href = './uitje-plan.html';
+  }
+
+  async function init(){
+    var existingCode = getPollCodeFromURL();
+
+    if (existingCode){
+      pollCode = existingCode;
+      var info = await fetchPollInfo(existingCode);
+
+      if (!info || !info.options || info.options.length === 0){
+        showBlock('setup-block', false);
+        showBlock('share-block', false);
+        showBlock('respond-block', false);
+        showBlock('result-block', false);
+        showBlock('notfound-block', true);
+        return;
+      }
+
+      pollOptions = info.options;
+      pollContext = info.context || null;
+      showBlock('setup-block', false);
+      showBlock('share-block', false);
+      showBlock('respond-block', true);
+      renderOptionCards();
+      renderResultCards();
+      showBlock('result-block', true);
+      refreshResults();
+      if (SUPABASE_READY) setInterval(refreshResults, 10000);
+      return;
+    }
+
+    var stored = null;
+    try { stored = localStorage.getItem('uitje_eigen_poll_code'); } catch (err) { /* no-op */ }
+
+    if (stored){
+      var ownInfo = await fetchPollInfo(stored);
+      if (ownInfo && ownInfo.options && ownInfo.options.length > 0){
+        pollCode = stored;
+        pollOptions = ownInfo.options;
+        pollContext = ownInfo.context || null;
+        showBlock('setup-block', false);
+        showShareBlock();
+        showBlock('respond-block', true);
+        renderOptionCards();
+        renderResultCards();
+        refreshResults();
+        if (SUPABASE_READY) setInterval(refreshResults, 10000);
+        return;
+      }
+      try { localStorage.removeItem('uitje_eigen_poll_code'); } catch (err) { /* no-op */ }
+    }
+
+    // Kwam de gebruiker vanuit de planner? Dan direct een stemming maken met die varianten.
+    var concept = loadConceptOptions();
+    if (concept && concept.options && concept.options.length > 0){
+      await createPollFromConcept(concept);
+      return;
+    }
+
+    showBlock('setup-block', true);
+    showBlock('share-block', false);
+    showBlock('respond-block', false);
+    showBlock('result-block', false);
+  }
+
+  function loadConceptOptions(){
+    try {
+      var raw = localStorage.getItem('uitje_concept_opties');
+      return raw ? JSON.parse(raw) : null;
+    } catch (err){ return null; }
+  }
+
+  async function createPollFromConcept(concept){
+    var code = randomCode();
+
+    if (SUPABASE_READY){
+      try {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/option_polls', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ id: code, options: concept.options, context: {
+            stad: concept.stad, personen: concept.personen, budget: concept.budget,
+            dagdeel: concept.dagdeel, vervoer: concept.vervoer
+          }})
+        });
+        if (!res.ok){
+          console.error('Kon stemming niet aanmaken:', res.status, await res.text());
+          showBlock('setup-block', true);
+          return;
+        }
+      } catch (err){
+        console.error('Kon stemming niet aanmaken:', err);
+        showBlock('setup-block', true);
+        return;
+      }
+    }
+
+    pollCode = code;
+    pollOptions = concept.options;
+    pollContext = concept;
+    try {
+      localStorage.setItem('uitje_eigen_poll_code', code);
+      localStorage.removeItem('uitje_concept_opties');
+    } catch (err) { /* no-op */ }
+
+    showBlock('setup-block', false);
+    showShareBlock();
+    showBlock('respond-block', true);
+    renderOptionCards();
+    renderResultCards();
+    refreshResults();
+    if (SUPABASE_READY) setInterval(refreshResults, 10000);
+  }
+
+  function randomCode(){
+    var chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+    var code = '';
+    for (var i = 0; i < 6; i++){
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

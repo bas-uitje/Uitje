@@ -5,145 +5,181 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
 <title>Uitje &#8212; Wanneer kan iedereen?</title>
+<meta name="description" content="Deel een linkje en laat iedereen doorgeven wanneer het uitkomt — geen appjes meer nodig.">
+<meta name="robots" content="noindex">
+
+<link rel="icon" type="image/x-icon" href="./favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Uitje — Wanneer kan iedereen?">
+<meta property="og:description" content="Deel een linkje en laat iedereen doorgeven wanneer het uitkomt.">
+<meta property="og:image" content="./og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="./og-image.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#F7F4EC;
-    --ink:#14161A;
-    --red:#D6402C;
-    --blue:#1B4E9B;
-    --yellow:#F2B705;
-    --line:3px;
+    --paper:#FBF8F3; --surface:#FFFFFF; --ink:#1A1A1F; --muted:#6B6B76;
+    --line-soft:#E8E3DA; --coral:#F4623A; --coral-soft:#FDEDE8; --green:#0E7C5A;
+    --amber:#F0B429; --radius-lg:20px; --radius-md:14px; --radius-pill:999px;
+    --shadow-sm:0 1px 2px rgba(26,26,31,.04), 0 2px 8px rgba(26,26,31,.04);
+    --shadow-md:0 2px 4px rgba(26,26,31,.04), 0 8px 24px rgba(26,26,31,.07);
   }
   *{box-sizing:border-box;}
-  button, a, select, input{ transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
   html{scroll-behavior:smooth; color-scheme:light;}
-  body{
-    margin:0;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    font-size:17px;
-    line-height:1.55;
-  }
-  h1,h2,.wordmark,.btn{ font-family:'Space Grotesk',sans-serif; }
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:17px;
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.wordmark,.chip-select,.chip-input,.date-input{font-family:'Space Grotesk',sans-serif;}
   a{color:inherit;}
-  .wrap{ max-width:760px; margin:0 auto; padding:0 28px; }
-  :focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+  button,a,select,input{transition:background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .12s ease;}
+  .wrap{max-width:820px;margin:0 auto;padding:0 24px;}
+  :focus-visible{outline:3px solid var(--coral);outline-offset:2px;}
 
-  nav.wrap{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding-top:26px;
-    padding-bottom:10px;
-  }
-  .wordmark{ font-size:22px; font-weight:700; letter-spacing:-0.01em; }
-  .wordmark span{color:var(--red);}
-  .back-link{
-    font-size:14px;
-    font-weight:600;
-    color:var(--ink);
-    text-decoration:none;
-    border-bottom:2px solid var(--ink);
-  }
-  .back-link:hover{color:var(--blue); border-color:var(--blue);}
+  nav.wrap{display:flex;align-items:center;justify-content:space-between;padding-top:22px;padding-bottom:14px;}
+  .wordmark{font-size:23px;font-weight:700;letter-spacing:-.02em;}
+  .wordmark span{color:var(--coral);}
+  .back-link{font-size:14.5px;font-weight:600;color:var(--muted);text-decoration:none;}
+  .back-link:hover{color:var(--coral);}
 
-  main{padding:20px 0 80px;}
-  h2{ font-size:clamp(28px,4.5vw,38px); margin:0 0 14px; line-height:1.1; }
-  .lede2{ font-size:17px; max-width:56ch; color:#3a3d42; margin:0 0 40px; }
+  main{padding:24px 0 80px;}
+  h2{font-size:clamp(28px,4.2vw,38px);margin:0 0 12px;line-height:1.12;letter-spacing:-.025em;}
+  .lede2{font-size:17px;max-width:56ch;color:var(--muted);margin:0 0 40px;}
+  .demo-col-label{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 16px;}
+  .block{margin-bottom:44px;}
+  .card{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);
+    border:1px solid var(--line-soft);padding:24px 22px;}
 
-  .demo-col-label{
-    font-size:13px;
-    font-weight:600;
-    color:#6b6e73;
-    margin:0 0 14px;
-  }
-  .block{margin-bottom:52px;}
+  .nav-btn{border:none;background:var(--coral);color:#fff;padding:11px 22px;font-size:15px;
+    font-weight:600;cursor:pointer;border-radius:var(--radius-pill);text-decoration:none;
+    display:inline-block;font-family:'Space Grotesk',sans-serif;box-shadow:var(--shadow-sm);}
+  .nav-btn:hover{background:#E04E27;transform:translateY(-1px);}
+  .nav-btn.ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--line-soft);}
+  .nav-btn.ghost:hover{background:var(--coral-soft);border-color:var(--coral);color:var(--coral);}
 
-  .share-box{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
-  .chip-input, .date-input, .chip-select{
-    border:2px solid var(--ink);
-    padding:9px 12px;
-    font-size:14px;
-    font-weight:600;
-    font-family:'Space Grotesk',sans-serif;
-    background:var(--paper);
-    color:var(--ink);
-  }
-  .share-input{flex:1; min-width:200px; cursor:text;}
-  .microcopy{ font-size:14px; color:#6b6e73; margin:0 0 8px; }
+  .share-box{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px;}
+  .chip-input,.chip-select,.date-input{
+    border:1.5px solid var(--line-soft);border-radius:var(--radius-md);padding:12px 14px;
+    font-size:15px;font-weight:600;background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm);}
+  .share-input{flex:1;min-width:200px;cursor:text;}
+  .microcopy{font-size:13.5px;color:var(--muted);margin:0 0 8px;}
   .demo-note{font-style:italic;}
 
-  .nav-btn{
-    border:var(--line) solid var(--ink);
-    background:none;
-    padding:9px 18px;
-    font-size:15px;
-    font-weight:600;
-    cursor:pointer;
-    color:var(--ink);
-    text-decoration:none;
-    display:inline-block;
+  .field-row{margin-bottom:16px;max-width:280px;}
+  .field-row label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:7px;}
+  .field-row select,.field-row input{width:100%;}
+  .date-list{display:flex;flex-direction:column;gap:0;margin-bottom:20px;max-width:280px;}
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:10px;}
+  .date-chip{border:1.5px solid var(--line-soft);background:var(--surface);color:var(--ink);
+    padding:14px 20px;border-radius:var(--radius-md);font-family:'Space Grotesk',sans-serif;
+    font-weight:600;font-size:15px;cursor:pointer;box-shadow:var(--shadow-sm);}
+  .date-chip:hover{border-color:var(--coral);background:var(--coral-soft);}
+  .date-chip.selected{background:var(--coral);color:#fff;border-color:var(--coral);}
+
+  .result-chip{border:1.5px solid var(--line-soft);border-radius:var(--radius-md);padding:14px 18px;
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px;min-width:110px;
+    text-align:center;background:var(--surface);box-shadow:var(--shadow-sm);}
+  .result-chip .count{display:block;font-size:22px;margin-top:6px;font-weight:700;}
+  .lvl0{color:var(--muted);}
+  .lvl1{background:#FDEDE8;}
+  .lvl2{background:#FBD9CE;}
+  .lvl3{background:#F79274;color:#fff;border-color:#F79274;}
+  .lvl4{background:var(--coral);color:#fff;border-color:var(--coral);}
+  .result-chip.best{box-shadow:0 0 0 3px var(--coral);}
+  .result-text{margin-top:18px;font-size:15.5px;}
+  .tijdstip-note{font-size:14.5px;color:var(--muted);margin:0 0 18px;}
+
+  .option-cards{display:flex;flex-direction:column;gap:14px;}
+  .option-card{border:1.5px solid var(--line-soft);border-radius:var(--radius-lg);padding:20px 22px;
+    cursor:pointer;background:var(--surface);box-shadow:var(--shadow-sm);}
+  .option-card:hover{border-color:var(--coral);}
+  .option-card.selected{border-color:var(--coral);background:var(--coral-soft);}
+  .option-card h3{font-size:17px;margin:0 0 10px;}
+  .option-card ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--muted);}
+  .option-card li{margin-bottom:4px;}
+
+  .result-card{border:1.5px solid var(--line-soft);border-radius:var(--radius-md);padding:16px 20px;
+    margin-bottom:12px;background:var(--surface);box-shadow:var(--shadow-sm);}
+  .result-card.best{border-color:var(--coral);box-shadow:0 0 0 2px var(--coral-soft);}
+  .result-card h3{font-size:16px;margin:0 0 10px;display:flex;justify-content:space-between;}
+  .result-bar-track{background:var(--line-soft);height:8px;border-radius:var(--radius-pill);overflow:hidden;}
+  .result-bar-fill{background:var(--coral);height:100%;width:0%;transition:width .3s ease;}
+
+  .plan-preview-summary{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;
+    color:var(--coral);margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid var(--line-soft);}
+  .pp-row{display:flex;gap:14px;padding:10px 0;border-top:1px solid var(--line-soft);}
+  .pp-row:first-child{border-top:none;padding-top:0;}
+  .pp-time{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13.5px;color:var(--coral);min-width:48px;}
+  .pp-text strong{display:block;font-size:15px;font-weight:600;}
+  .pp-text span{font-size:13px;color:var(--muted);}
+  .final-badge{
+    display:inline-block;font-family:'Space Grotesk',sans-serif;font-size:11.5px;font-weight:700;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--green);background:#E6F4EF;
+    padding:6px 12px;border-radius:var(--radius-pill);margin:0 0 12px;
   }
-  .nav-btn:hover{ background:var(--ink); color:var(--paper); }
-
-  .field-row{ margin-bottom:16px; }
-  .field-row label{ display:block; font-size:13px; font-weight:600; color:#54575c; margin-bottom:6px; }
-  .date-input{ width:100%; max-width:220px; }
-  .date-list{ display:flex; flex-direction:column; gap:12px; margin-bottom:20px; max-width:260px; }
-
-  .chip-row{ display:flex; flex-wrap:wrap; gap:10px; }
-  .date-chip{
-    border:2px solid var(--ink);
-    background:var(--paper);
-    color:var(--ink);
-    padding:12px 18px;
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:700;
-    font-size:14px;
-    cursor:pointer;
+  .final-title{font-size:22px;margin:0 0 4px;letter-spacing:-.02em;}
+  .fi-row{display:flex;gap:14px;padding:14px 0;border-top:1px solid var(--line-soft);}
+  .fi-row:first-child{border-top:none;padding-top:0;}
+  .fi-time{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;color:var(--coral);min-width:52px;}
+  .fi-text strong{display:block;font-size:15.5px;font-weight:600;}
+  .fi-text span{font-size:13px;color:var(--muted);}
+  .fi-route{padding:6px 0 6px 66px;font-size:13px;}
+  .fi-route a{color:var(--coral);text-decoration:none;font-weight:600;}
+  .fi-route a:hover{text-decoration:underline;}
+  .feedback-box{
+    margin-top:26px;padding-top:20px;border-top:1px solid var(--line-soft);
   }
-  .date-chip:hover{background:#e9e4d5;}
-  .date-chip.selected{ background:var(--blue); color:var(--paper); }
-
-  .result-chip{
-    border:2px solid var(--ink);
-    padding:12px 16px;
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:700;
-    font-size:14px;
-    min-width:90px;
-    text-align:center;
+  .feedback-q{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;margin:0 0 12px;}
+  .feedback-btns{display:flex;gap:10px;}
+  .fb-btn{
+    display:flex;align-items:center;gap:8px;border:1.5px solid var(--line-soft);
+    background:var(--surface);border-radius:var(--radius-pill);padding:9px 18px;
+    font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:600;
+    color:var(--ink);cursor:pointer;
   }
-  .lvl0{background:var(--paper);}
-  .lvl1{background:#D9E6F7;}
-  .lvl2{background:#B0CCEF;}
-  .lvl3{background:#6FA0DE; color:var(--paper);}
-  .lvl4{background:var(--blue); color:var(--paper);}
-  .result-chip.best{ outline:3px solid var(--red); outline-offset:-3px; position:relative; }
-  .result-chip .count{ display:block; font-size:20px; margin-top:4px; }
-  .result-text{ margin-top:16px; font-size:15px; }
-  .tijdstip-note{ font-size:14px; color:#54575c; margin:0 0 16px; }
-
-  footer{padding:36px 0 50px; border-top:2px solid var(--ink);}
-  footer .wrap{ font-size:13.5px; color:#6b6e73; }
+  .fb-btn:hover{border-color:var(--coral);color:var(--coral);background:var(--coral-soft);}
+  .fb-btn.chosen{border-color:var(--coral);background:var(--coral);color:#fff;}
+  .feedback-extra{display:none;margin-top:14px;}
+  .weather-note{
+    margin:16px 0 0;padding:12px 14px;border-radius:var(--radius-md);
+    background:#FFF8E6;border:1px solid var(--amber);font-size:14px;color:#6B5410;
+  }
+  footer{padding:28px 0 44px;border-top:1px solid var(--line-soft);}
+  footer .wrap{font-size:13.5px;color:var(--muted);}
 </style>
 </head>
 <body>
 
 <nav class="wrap">
-  <div class="wordmark">Uit<span>je</span></div>
-  <a class="back-link" href="./index.html">&#8592; Terug naar Uitje</a>
+  <div class="wordmark">Uit<span>je.</span></div>
+  <a class="back-link" href="./index.html">&#8592; Terug</a>
 </nav>
 
 <main class="wrap">
   <h2>Wanneer kan iedereen?</h2>
+
+  <div class="block" id="plan-preview-block" style="display:none;">
+    <div class="card">
+      <p class="demo-col-label" style="margin-bottom:12px;">Het plan</p>
+      <p class="plan-preview-summary" id="plan-preview-summary"></p>
+      <div id="plan-preview-items"></div>
+      <p class="weather-note" id="weather-note" style="display:none;"></p>
+    </div>
+  </div>
+
   <p class="lede2">Kies een paar datums die voor jou werken, deel &eacute;&eacute;n linkje, en iedereen laat weten welke datum ook bij hen past.</p>
 
   <!-- SETUP: alleen zichtbaar voordat er een linkje bestaat -->
   <div class="block" id="setup-block">
+    <p class="microcopy" id="no-plan-note" style="display:none;margin-bottom:16px;">
+      Nog geen plan bevestigd? <a href="./index.html#plannen" style="color:var(--coral);text-decoration:underline;">Maak eerst je Uitje</a> &#8212; dan zien je vrienden meteen waar het over gaat.
+    </p>
     <p class="demo-col-label">Kies je datums</p>
 
     <div class="field-row">
@@ -192,14 +228,24 @@
 
   <!-- ZIJ VULLEN IN: alleen zichtbaar via het gedeelde linkje -->
   <div class="block" id="respond-block" style="display:none;">
-    <p class="demo-col-label">Zij vullen in</p>
+    <p class="demo-col-label">Vul in wanneer je kunt</p>
     <p class="tijdstip-note" id="respond-tijdstip-note"></p>
     <input type="text" id="resp-naam" class="chip-input" placeholder="Jouw naam" style="margin-bottom:14px;width:100%;max-width:240px;">
+    <input type="text" name="website" id="hp-resp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
     <div class="chip-row" id="date-picker"></div>
     <div class="share-box" style="margin-top:16px;">
       <button type="button" class="nav-btn" onclick="submitAvailability()">Versturen</button>
     </div>
     <p class="microcopy" id="resp-status">Vul je naam in, tik de datums aan die voor jou werken, en verstuur.</p>
+  </div>
+
+  <!-- NIET GEVONDEN: ongeldig of verlopen linkje -->
+  <div class="block" id="notfound-block" style="display:none;">
+    <div class="card">
+      <h3 style="margin:0 0 10px;">Dit plan bestaat niet (meer)</h3>
+      <p style="margin:0 0 18px;color:var(--muted);">Het linkje klopt niet, of het plan is verwijderd. Vraag degene die het deelde om een nieuw linkje.</p>
+      <a class="nav-btn" href="./uitje-plan.html">Zelf een plan maken</a>
+    </div>
   </div>
 
   <!-- RESULTAAT: zichtbaar zodra er een plan is -->
@@ -211,11 +257,53 @@
     <p class="tijdstip-note" id="result-tijdstip-note"></p>
     <div class="chip-row" id="result-chips"></div>
     <p class="result-text" id="result-text"></p>
+    <div class="share-box" id="lock-box" style="display:none;margin-top:18px;">
+      <button type="button" class="nav-btn" id="lock-btn" onclick="lockInDate()">Zet deze datum vast</button>
+    </div>
+  </div>
+
+  <!-- AFSLUITSCHERM -->
+  <div class="block" id="final-block" style="display:none;">
+    <div class="card">
+      <p class="final-badge">Geregeld</p>
+      <h3 class="final-title" id="final-title"></h3>
+      <p class="microcopy" id="final-sub" style="margin-bottom:20px;"></p>
+
+      <div id="final-itinerary"></div>
+
+      <p class="microcopy" id="final-route-note" style="display:none;margin-top:14px;"></p>
+
+      <div class="share-box" style="margin-top:24px;">
+        <a class="nav-btn" id="wa-share" href="#" target="_blank" rel="noopener">Deel via WhatsApp</a>
+        <button type="button" class="nav-btn ghost" onclick="downloadICS()">Zet in agenda</button>
+        <button type="button" class="nav-btn ghost" onclick="copyFinalPlan()">Kopieer als tekst</button>
+      </div>
+      <p class="microcopy" id="final-status" style="margin-top:10px;"></p>
+
+      <div class="feedback-box" id="feedback-box">
+        <p class="feedback-q">Werkte dit voor je?</p>
+        <div class="feedback-btns">
+          <button type="button" class="fb-btn" onclick="sendFeedback('goed')" aria-label="Ja, dit werkte">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11"/><path d="M4 10h3v11H4z"/><path d="M7 10l4-7a2 2 0 0 1 3 1v4h4.5a2 2 0 0 1 2 2.4l-1.4 7A2 2 0 0 1 17 19H7"/></svg>
+            <span>Ja</span>
+          </button>
+          <button type="button" class="fb-btn" onclick="sendFeedback('slecht')" aria-label="Nee, dit werkte niet">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V3"/><path d="M20 14h-3V3h3z"/><path d="M17 14l-4 7a2 2 0 0 1-3-1v-4H5.5a2 2 0 0 1-2-2.4l1.4-7A2 2 0 0 1 7 5h10"/></svg>
+            <span>Nee</span>
+          </button>
+        </div>
+        <div class="feedback-extra" id="feedback-extra">
+          <textarea id="feedback-note" class="chip-input" rows="2" placeholder="Wat kon beter? (optioneel)" style="width:100%;resize:vertical;font-family:'Inter',sans-serif;font-weight:400;"></textarea>
+          <button type="button" class="nav-btn ghost" style="margin-top:8px;" onclick="sendFeedbackNote()">Versturen</button>
+        </div>
+        <p class="microcopy" id="feedback-status" style="margin:10px 0 0;"></p>
+      </div>
+    </div>
   </div>
 </main>
 
 <footer>
-  <div class="wrap">Onderdeel van Uitje.</div>
+  <div class="wrap">Onderdeel van Uitje. &middot; <a href="./privacy.html" style="color:inherit;text-decoration:underline;">Privacy</a></div>
 </footer>
 
 <script>
@@ -248,6 +336,98 @@
     }
   }
 
+  var cityCoords = {
+    "Amsterdam":  [52.3676, 4.9041],
+    "Rotterdam":  [51.9244, 4.4777],
+    "Den Haag":   [52.0705, 4.3007],
+    "Utrecht":    [52.0907, 5.1214],
+    "Eindhoven":  [51.4416, 5.4697],
+    "Groningen":  [53.2194, 6.5665],
+    "Tilburg":    [51.5555, 5.0913],
+    "Almere":     [52.3508, 5.2647],
+    "Breda":      [51.5719, 4.7683],
+    "Nijmegen":   [51.8425, 5.8528],
+    "Haarlem":    [52.3874, 4.6462],
+    "Arnhem":     [51.9851, 5.8987]
+  };
+
+  // Indoor-alternatieven voor de 'activiteit'-stap (categorie-index 2), gebruikt bij regen.
+  var weerActiviteitenRegen = {
+    gezellig:     ["Binnen bowlen", "Museum bezoeken", "Bordspellencaf\u00e9 bezoeken", "Escape room doen"],
+    romantisch:   ["Museumbezoek samen", "Binnen wijnproeverij", "Filmpje pakken", "Plantenkas bezoeken"],
+    avontuurlijk: ["Escape room doen", "Lasergamen", "Klimhal bezoeken", "VR-ervaring proberen"],
+    chill:        ["Film kijken bij een filmzaal", "Bordspellencaf\u00e9 bezoeken", "Sauna-bezoek", "Boekwinkel snuffelen"],
+    actief:       ["Klimhal bezoeken", "Trampolinepark bezoeken", "Binnen padellen", "Bowlingbaan bezoeken"]
+  };
+
+  async function getIsRaining(stad){
+    var coords = cityCoords[stad];
+    if (!coords) return null; // onbekende/zelf ingevulde stad: geen weerdata
+    try {
+      var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + coords[0] + '&longitude=' + coords[1] + '&current=precipitation';
+      var res = await fetch(url);
+      if (!res.ok) return null;
+      var data = await res.json();
+      var mm = data && data.current ? data.current.precipitation : null;
+      return (typeof mm === 'number') ? (mm > 0) : null;
+    } catch (err){
+      console.error('Kon weer niet ophalen:', err);
+      return null;
+    }
+  }
+
+  function isToday(dateStr){
+    var today = new Date();
+    var y = today.getFullYear();
+    var m = String(today.getMonth() + 1).padStart(2, '0');
+    var d = String(today.getDate()).padStart(2, '0');
+    return dateStr === (y + '-' + m + '-' + d);
+  }
+
+  // Toont een weerwaarschuwing bij het plan, maar alleen als het uitje vandaag is.
+  async function checkWeatherForToday(plan, dates){
+    if (!plan || !plan.stad) return;
+    var vandaagInPlan = (dates || []).some(isToday);
+    if (!vandaagInPlan) return;
+
+    var raining = await getIsRaining(plan.stad);
+    if (raining !== true) return;
+
+    var note = document.getElementById('weather-note');
+    if (!note) return;
+    var sfeerPool = weerActiviteitenRegen[plan.sfeer] || weerActiviteitenRegen.gezellig;
+    note.innerHTML = '<strong>Regen verwacht in ' + plan.stad + ' vandaag.</strong> ' +
+      'Overweeg een binnenactiviteit, bijvoorbeeld: ' + sfeerPool.slice(0, 3).join(', ').toLowerCase() + '.';
+    note.style.display = 'block';
+  }
+
+  var planItems = null;
+
+  function renderPlanPreview(plan){
+    if (!plan || !plan.items || plan.items.length === 0) return;
+    var block = document.getElementById('plan-preview-block');
+    var summary = document.getElementById('plan-preview-summary');
+    var container = document.getElementById('plan-preview-items');
+    if (!block || !container) return;
+
+    var sumText = 'Voor ' + plan.personen + (plan.personen === 1 ? ' persoon' : ' personen') + ' in ' + plan.stad;
+    if (plan.thema) sumText += ' \u2014 ' + plan.thema;
+    if (summary) summary.textContent = sumText;
+
+    var html = '';
+    plan.items.forEach(function(it){
+      var titel = it.link
+        ? '<a href="' + it.link + '" target="_blank" rel="noopener" style="color:inherit;">' + it.titel + '</a>'
+        : it.titel;
+      html += '<div class="pp-row">' +
+        '<div class="pp-time">' + (it.tijd || '') + '</div>' +
+        '<div class="pp-text"><strong>' + titel + '</strong>' +
+        (it.sub ? '<span>' + it.sub + '</span>' : '') + '</div></div>';
+    });
+    container.innerHTML = html;
+    block.style.display = 'block';
+  }
+
   function showBlock(id, show){
     var el = document.getElementById(id);
     if (el) el.style.display = show ? 'block' : 'none';
@@ -264,14 +444,24 @@
     return dates;
   }
 
+  function loadConfirmedPlan(){
+    try {
+      var raw = localStorage.getItem('uitje_bevestigd_plan');
+      return raw ? JSON.parse(raw) : null;
+    } catch (err){ return null; }
+  }
+
   async function createPlanFromSetup(){
     var status = document.getElementById('setup-status');
     var dates = collectSetupDates();
+    // dubbele datums eruit filteren en op volgorde zetten
+    dates = dates.filter(function(d, i){ return dates.indexOf(d) === i; }).sort();
     if (dates.length < 2){
-      if (status) status.textContent = 'Vul minstens 2 datums in.';
+      if (status) status.textContent = 'Vul minstens 2 verschillende datums in.';
       return;
     }
     var tijdstip = document.getElementById('setup-tijdstip').value;
+    if (!planItems) planItems = loadConfirmedPlan();
 
     var chars = 'abcdefghijkmnpqrstuvwxyz23456789';
     var code = '';
@@ -289,7 +479,7 @@
             'Content-Type': 'application/json',
             'Prefer': 'return=minimal'
           },
-          body: JSON.stringify({ id: code, dates: dates, tijdstip: tijdstip })
+          body: JSON.stringify({ id: code, dates: dates, tijdstip: tijdstip, plan_items: planItems })
         });
         if (!res.ok){
           var errText = await res.text();
@@ -313,6 +503,8 @@
 
     showBlock('setup-block', false);
     showShareBlock();
+    showBlock('respond-block', true);
+    renderDatePicker();
     renderResultChips();
     refreshResults();
   }
@@ -374,7 +566,7 @@
   async function fetchPlanInfo(code){
     if (!SUPABASE_READY) return null;
     try {
-      var res = await fetch(SUPABASE_URL + '/rest/v1/plans?id=eq.' + encodeURIComponent(code) + '&select=dates,tijdstip', {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/plans?id=eq.' + encodeURIComponent(code) + '&select=dates,tijdstip,plan_items', {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
       });
       var data = await res.json();
@@ -388,6 +580,266 @@
 
   // ===== ZIJ VULLEN IN (genodigde) =====
 
+  // ===== AFSLUITSCHERM =====
+
+  var lockedDate = null;
+
+  var TRAVEL_MODES = { lopend: 'walking', fiets: 'bicycling', auto: 'driving' };
+  var TRAVEL_LABELS = { lopend: 'Looproute', fiets: 'Fietsroute', auto: 'Autoroute' };
+
+  function buildRouteLink(fromItem, toItem, vervoer){
+    var from = fromItem.adres || fromItem.titel;
+    var to = toItem.adres || toItem.titel;
+    if (!fromItem.adres || !toItem.adres) return null; // zonder echte adressen heeft een route geen zin
+    var mode = TRAVEL_MODES[vervoer] || 'walking';
+    return 'https://www.google.com/maps/dir/?api=1' +
+      '&origin=' + encodeURIComponent(from) +
+      '&destination=' + encodeURIComponent(to) +
+      '&travelmode=' + mode;
+  }
+
+  function formatDateLongNL(dateStr){
+    try {
+      var d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' });
+    } catch (err){ return dateStr; }
+  }
+
+  function renderFinalScreen(){
+    if (!lockedDate || !planItems || !planItems.items) return;
+
+    document.getElementById('final-title').textContent =
+      'Uitje op ' + formatDateLongNL(lockedDate);
+
+    var sub = planItems.stad;
+    if (planItems.personen) sub += ' \u00b7 ' + planItems.personen + (planItems.personen === 1 ? ' persoon' : ' personen');
+    if (planItems.budget) sub += ' \u00b7 ' + planItems.budget;
+    document.getElementById('final-sub').textContent = sub;
+
+    var vervoer = planItems.vervoer || 'lopend';
+    var items = planItems.items;
+    var html = '';
+    var anyRoute = false;
+
+    items.forEach(function(it, idx){
+      var titel = it.link
+        ? '<a href="' + it.link + '" target="_blank" rel="noopener" style="color:inherit;">' + it.titel + '</a>'
+        : it.titel;
+      html += '<div class="fi-row">' +
+        '<div class="fi-time">' + (it.tijd || '') + '</div>' +
+        '<div class="fi-text"><strong>' + titel + '</strong>' +
+        (it.sub ? '<span>' + it.sub + '</span>' : '') + '</div></div>';
+
+      if (idx < items.length - 1){
+        var routeUrl = buildRouteLink(it, items[idx + 1], vervoer);
+        if (routeUrl){
+          anyRoute = true;
+          html += '<div class="fi-route">\u2193 <a href="' + routeUrl + '" target="_blank" rel="noopener">' +
+            (TRAVEL_LABELS[vervoer] || 'Route') + ' naar ' + items[idx + 1].titel + '</a></div>';
+        } else {
+          html += '<div class="fi-route" style="color:var(--muted);">\u2193 naar de volgende plek</div>';
+        }
+      }
+    });
+
+    document.getElementById('final-itinerary').innerHTML = html;
+
+    var note = document.getElementById('final-route-note');
+    if (!anyRoute && note){
+      note.textContent = 'Tip: zoek in de planner eerst echte locaties op, dan krijg je hier ook routebeschrijvingen tussen de plekken.';
+      note.style.display = 'block';
+    }
+
+    var wa = document.getElementById('wa-share');
+    if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent(finalPlanAsText());
+
+    document.getElementById('final-block').style.display = 'block';
+    document.getElementById('final-block').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function finalPlanAsText(){
+    var lines = [];
+    lines.push('Ons Uitje \u2014 ' + formatDateLongNL(lockedDate));
+    lines.push(planItems.stad + (planItems.personen ? ' \u00b7 ' + planItems.personen + ' personen' : ''));
+    lines.push('');
+    planItems.items.forEach(function(it){
+      lines.push(it.tijd + '  ' + it.titel);
+      if (it.adres) lines.push('        ' + it.adres);
+    });
+    lines.push('');
+    lines.push('Gemaakt met Uitje');
+    return lines.join('\n');
+  }
+
+  async function lockInDate(){
+    var bestDate = document.getElementById('lock-btn').getAttribute('data-date');
+    if (!bestDate) return;
+    lockedDate = bestDate;
+
+    if (!planItems){
+      // Geen gekoppeld plan: alleen de datum bevestigen.
+      var rt = document.getElementById('result-text');
+      if (rt) rt.innerHTML = '<strong>Vastgezet: ' + formatDateLongNL(bestDate) + '</strong>';
+      document.getElementById('lock-box').style.display = 'none';
+      return;
+    }
+    document.getElementById('lock-box').style.display = 'none';
+    renderFinalScreen();
+  }
+
+  // ===== FEEDBACK =====
+
+  var feedbackScore = null;
+
+  async function sendFeedback(score){
+    feedbackScore = score;
+    document.querySelectorAll('.fb-btn').forEach(function(b){ b.classList.remove('chosen'); });
+    var btns = document.querySelectorAll('.fb-btn');
+    if (score === 'goed' && btns[0]) btns[0].classList.add('chosen');
+    if (score === 'slecht' && btns[1]) btns[1].classList.add('chosen');
+
+    // Bij een negatieve score meteen om toelichting vragen: daar leer je het meest van.
+    var extra = document.getElementById('feedback-extra');
+    if (extra) extra.style.display = 'block';
+
+    var status = document.getElementById('feedback-status');
+    if (status) status.textContent = score === 'goed'
+      ? 'Fijn om te horen. Nog een tip? Laat het hieronder weten.'
+      : 'Jammer. Vertel je kort wat er misging?';
+
+    await postFeedback(score, '');
+  }
+
+  async function sendFeedbackNote(){
+    var noteEl = document.getElementById('feedback-note');
+    var note = (noteEl.value || '').trim();
+    var status = document.getElementById('feedback-status');
+    if (!note){
+      if (status) status.textContent = 'Schrijf eerst iets, of laat het leeg en sluit af.';
+      return;
+    }
+    await postFeedback(feedbackScore || 'onbekend', note);
+    if (status) status.textContent = 'Bedankt, dit helpt echt.';
+    document.getElementById('feedback-extra').style.display = 'none';
+  }
+
+  async function postFeedback(score, opmerking){
+    if (!SUPABASE_READY) return;
+    try {
+      await fetch(SUPABASE_URL + '/rest/v1/feedback', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          plan_id: planCode || null,
+          score: score,
+          opmerking: opmerking || null,
+          stad: (planItems && planItems.stad) ? planItems.stad : null
+        })
+      });
+    } catch (err){
+      console.error('Kon feedback niet opslaan:', err);
+    }
+  }
+
+  function copyFinalPlan(){
+    var text = finalPlanAsText();
+    var status = document.getElementById('final-status');
+    function done(){ if (status) status.textContent = 'Gekopieerd naar je klembord.'; }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(function(){
+        if (status) status.textContent = 'Kopi\u00ebren lukte niet \u2014 selecteer de tekst handmatig.';
+      });
+    } else {
+      if (status) status.textContent = 'Kopi\u00ebren wordt niet ondersteund in deze browser.';
+    }
+  }
+
+  function icsTimestamp(dateStr, timeStr){
+    var t = (timeStr || '19:00').split(':');
+    var hh = (t[0] || '19').padStart(2, '0');
+    var mm = (t[1] || '00').padStart(2, '0');
+    return dateStr.replace(/-/g, '') + 'T' + hh + mm + '00';
+  }
+
+  function downloadICS(){
+    if (!lockedDate || !planItems) return;
+    var items = planItems.items;
+    var startTime = items.length ? items[0].tijd : '19:00';
+    var lastTime = items.length ? items[items.length - 1].tijd : '22:00';
+
+    // Einde: laatste activiteit + 1,5 uur
+    var lt = (lastTime || '22:00').split(':');
+    var endMins = (parseInt(lt[0],10) || 22) * 60 + (parseInt(lt[1],10) || 0) + 90;
+    var endH = String(Math.floor(endMins / 60) % 24).padStart(2, '0');
+    var endM = String(endMins % 60).padStart(2, '0');
+
+    var desc = finalPlanAsText().replace(/\n/g, '\\n');
+    var loc = items.length && items[0].adres ? items[0].adres : planItems.stad;
+
+    var ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Uitje//NL',
+      'BEGIN:VEVENT',
+      'UID:' + planCode + '@uitje',
+      'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z',
+      'DTSTART:' + icsTimestamp(lockedDate, startTime),
+      'DTEND:' + lockedDate.replace(/-/g,'') + 'T' + endH + endM + '00',
+      'SUMMARY:Uitje in ' + planItems.stad,
+      'DESCRIPTION:' + desc,
+      'LOCATION:' + loc,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+
+    var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'uitje-' + lockedDate + '.ics';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    var status = document.getElementById('final-status');
+    if (status) status.textContent = 'Agenda-bestand gedownload.';
+  }
+
+  function hasAlreadyResponded(){
+    try { return localStorage.getItem('uitje_ingevuld_' + planCode) === '1'; }
+    catch (err) { return false; }
+  }
+
+  function markAlreadyResponded(){
+    var block = document.getElementById('respond-block');
+    if (!block) return;
+    var picker = document.getElementById('date-picker');
+    var naamInput = document.getElementById('resp-naam');
+    var btn = block.querySelector('button.nav-btn');
+    if (picker) picker.style.opacity = '.5';
+    if (picker) picker.style.pointerEvents = 'none';
+    if (naamInput) naamInput.disabled = true;
+    if (btn){
+      btn.textContent = 'Al ingevuld';
+      btn.disabled = true;
+      btn.style.opacity = '.5';
+      btn.style.cursor = 'default';
+    }
+    var status = document.getElementById('resp-status');
+    if (status) status.innerHTML = 'Je hebt al ingevuld. <a href="#" onclick="resetMyResponse(); return false;" style="color:var(--coral);text-decoration:underline;">Opnieuw invullen</a>';
+  }
+
+  function resetMyResponse(){
+    try { localStorage.removeItem('uitje_ingevuld_' + planCode); } catch (err) { /* no-op */ }
+    window.location.reload();
+  }
+
   function renderDatePicker(){
     var container = document.getElementById('date-picker');
     if (!container) return;
@@ -399,11 +851,19 @@
 
     var note = document.getElementById('respond-tijdstip-note');
     if (note) note.textContent = 'Tijdstip: ' + (TIJDSTIP_LABELS[planTijdstip] || planTijdstip) + '.';
+
+    if (hasAlreadyResponded()) markAlreadyResponded();
   }
 
   async function submitAvailability(){
     var status = document.getElementById('resp-status');
     var naam = (document.getElementById('resp-naam').value || '').trim();
+    var honeypot = document.getElementById('hp-resp');
+
+    if (honeypot && honeypot.value){
+      if (status) status.textContent = 'Bedankt! Je beschikbaarheid is opgeslagen.';
+      return;
+    }
 
     if (!naam){
       if (status) status.textContent = 'Vul eerst je naam in.';
@@ -444,6 +904,8 @@
         return;
       }
       if (status) status.textContent = 'Bedankt ' + naam + '! Je beschikbaarheid is opgeslagen.';
+      try { localStorage.setItem('uitje_ingevuld_' + planCode, '1'); } catch (err) { /* no-op */ }
+      markAlreadyResponded();
       refreshResults();
     } catch (err){
       console.error('Kon reactie niet opslaan:', err);
@@ -522,6 +984,14 @@
           resultText.innerHTML = '<strong>Nog geen reacties</strong> &#8212; deel het linkje om beschikbaarheid te verzamelen.';
         } else {
           resultText.innerHTML = '<strong>Beste datum: ' + formatDateNL(bestDate) + '</strong> \u2014 ' + bestCount + ' van de ' + total + ' kunnen';
+          // Organisator kan de winnende datum vastzetten (niet zichtbaar voor genodigden).
+          var lockBox = document.getElementById('lock-box');
+          var lockBtn = document.getElementById('lock-btn');
+          if (lockBox && lockBtn && !getPlanCodeFromURL() && !lockedDate){
+            lockBtn.setAttribute('data-date', bestDate);
+            lockBtn.textContent = 'Zet vast: ' + formatDateNL(bestDate);
+            lockBox.style.display = 'flex';
+          }
         }
       }
     } catch (err){
@@ -539,9 +1009,22 @@
       // Genodigde: dit IS het plan.
       planCode = existingCode;
       var info = await fetchPlanInfo(existingCode);
-      if (info){
-        planDates = info.dates || [];
-        planTijdstip = info.tijdstip || 'avond';
+
+      if (!info || !info.dates || info.dates.length === 0){
+        // Linkje klopt niet of het plan bestaat niet meer.
+        showBlock('setup-block', false);
+        showBlock('share-block', false);
+        showBlock('respond-block', false);
+        showBlock('result-block', false);
+        showBlock('notfound-block', true);
+        return;
+      }
+
+      planDates = info.dates;
+      planTijdstip = info.tijdstip || 'avond';
+      if (info.plan_items){
+        renderPlanPreview(info.plan_items);
+        checkWeatherForToday(info.plan_items, planDates);
       }
       showBlock('setup-block', false);
       showBlock('share-block', false);
@@ -559,21 +1042,43 @@
 
     if (stored){
       // Organisator die terugkomt op zijn eigen plan.
-      planCode = stored;
       var ownInfo = await fetchPlanInfo(stored);
-      if (ownInfo){
-        planDates = ownInfo.dates || [];
+      if (ownInfo && ownInfo.dates && ownInfo.dates.length > 0){
+        planCode = stored;
+        planDates = ownInfo.dates;
         planTijdstip = ownInfo.tijdstip || 'avond';
+        if (ownInfo.plan_items){
+          planItems = ownInfo.plan_items;
+          renderPlanPreview(planItems);
+          checkWeatherForToday(planItems, planDates);
+        }
+        showBlock('setup-block', false);
+        showShareBlock();
+        showBlock('respond-block', true);
+        renderDatePicker();
+        renderResultChips();
+        refreshResults();
+        if (SUPABASE_READY) setInterval(refreshResults, 10000);
+        return;
       }
-      showBlock('setup-block', false);
-      showShareBlock();
-      renderResultChips();
-      refreshResults();
-      if (SUPABASE_READY) setInterval(refreshResults, 10000);
-      return;
+      // Opgeslagen plan bestaat niet meer: opruimen en gewoon opnieuw beginnen.
+      try { localStorage.removeItem('uitje_eigen_plan_code'); } catch (err) { /* no-op */ }
     }
 
-    // Nieuw bezoek: toon het formulier om datums te kiezen.
+    // Nieuw bezoek: toon het bevestigde plan (indien aanwezig) en het datumformulier.
+    planItems = loadConfirmedPlan();
+    if (planItems){
+      renderPlanPreview(planItems);
+    } else {
+      var noPlanNote = document.getElementById('no-plan-note');
+      if (noPlanNote) noPlanNote.style.display = 'block';
+    }
+
+    var today = new Date().toISOString().split('T')[0];
+    for (var d = 1; d <= 4; d++){
+      var inp = document.getElementById('setup-date-' + d);
+      if (inp) inp.min = today;
+    }
     showBlock('setup-block', true);
     showBlock('share-block', false);
     showBlock('respond-block', false);
