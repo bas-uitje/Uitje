@@ -835,10 +835,20 @@
       document.getElementById('plan-time-' + i).textContent = tijden[i - 1];
 
       var subEl = document.getElementById('plan-sub-' + i);
-      if (i === 1) subEl.textContent = stad + ' \u2014 vlakbij, geen wachtrij';
-      else if (i === 2) subEl.textContent = 'Binnen ' + budgetLabel + ', ' + stad;
-      else if (i === aantal) subEl.textContent = 'Rustig afsluiten, geen reservering nodig';
-      else subEl.textContent = stad;
+      var titelTekst = titleLink.textContent;
+      if (thuisRegex.test(titelTekst)){
+        subEl.textContent = 'Thuis \u2014 geen locatie nodig';
+      } else if (onderwegRegex.test(titelTekst)){
+        subEl.textContent = 'Onderweg \u2014 geen vaste plek';
+      } else if (i === 1){
+        subEl.textContent = stad + ' \u2014 vlakbij, geen wachtrij';
+      } else if (i === 2){
+        subEl.textContent = 'Binnen ' + budgetLabel + ', ' + stad;
+      } else if (i === aantal){
+        subEl.textContent = 'Rustig afsluiten, geen reservering nodig';
+      } else {
+        subEl.textContent = stad;
+      }
     }
 
     var placesStatus = document.getElementById('places-status');
@@ -1090,6 +1100,146 @@
     return (data.places && data.places.length > 0) ? data.places[0] : null;
   }
 
+  // Vertaalt de GETOONDE suggestie naar een passende Google Maps-zoekterm.
+  // Zonder dit zoekt hij iets anders dan er op het scherm staat.
+  var zoektermRegels = [
+    [/\bpool\w*\b|\bbiljart/i,             'poolcaf\u00e9'],
+    [/\bdart/i,                            'dartcaf\u00e9'],
+    [/\bbowl/i,                            'bowlingbaan'],
+    [/\bminigolf/i,                        'minigolfbaan'],
+    [/\bgolf(les|baan|club)?\b/i,          'golfbaan'],
+    [/\bpadel/i,                           'padelbaan'],
+    [/\btennis/i,                          'tennisbaan'],
+    [/\bsquash/i,                          'squashbaan'],
+    [/\bkart/i,                            'kartbaan'],
+    [/\blasergame|lasergamen/i,            'lasergamen'],
+    [/\bescape ?room/i,                    'escape room'],
+    [/\btrampoline/i,                      'trampolinepark'],
+    [/\bklim|boulder/i,                    'klimhal'],
+    [/\bschaats/i,                         'schaatsbaan'],
+    [/\bzwemm|zwembad|baan zwemmen/i,      'zwembad'],
+    [/\bsauna|stoombad/i,                  'sauna'],
+    [/\bspa\b|wellness|massage/i,          'wellness'],
+    [/\bkaraoke/i,                         'karaokebar'],
+    [/\bbioscoop|film pakken|filmhuis/i,   'bioscoop'],
+    [/\btheater|voorstelling|opera|ballet/i,'theater'],
+    [/\bconcert|livemuziek|live muziek/i,  'concertzaal'],
+    [/\bjazz/i,                            'jazzclub'],
+    [/\bmuseum|expositie|galerie|kunst/i,  'museum'],
+    [/\bbotanische|plantenkas/i,           'botanische tuin'],
+    [/\bboot|rondvaart|varen|zeil|sup\b|roei/i,'rondvaart'],
+    [/\bmarkt\b|bloemenmarkt|foodmarkt/i, 'markt'],
+    [/\bbakker|croissant|broodje/i,        'bakkerij'],
+    [/\bijs(je|salon)|gelato/i,            'ijssalon'],
+    [/\bwafel|poffertjes|stroopwafel/i,    'wafelzaak'],
+    [/\bpatisserie|petit-four|macaron|taart|gebak/i,'patisserie'],
+    [/\bchocola/i,                         'chocolaterie'],
+    [/\bsmoothie|sapje|vers geperst|a\u00e7a\u00ed/i,'smoothiebar'],
+    [/\bmilkshake|frozen yog/i,            'milkshakebar'],
+    [/\bbubble tea/i,                      'bubble tea'],
+    [/\bkoffie|espresso|grand caf\u00e9/i,  'koffiezaak'],
+    [/\bthee|theehuis|high tea/i,          'theehuis'],
+    [/\bchampagne|bubbels/i,               'champagnebar'],
+    [/\bwijn/i,                            'wijnbar'],
+    [/\bcocktail|speakeasy|mixolog/i,      'cocktailbar'],
+    [/\bwhisky|cognac|gin-tasting|gin\b/i, 'whiskybar'],
+    [/\bbrouwerij|speciaalbier|bier proeven/i,'brouwerij'],
+    [/\bnachtclub|club bezoeken|dansen|afterparty/i,'nachtclub'],
+    [/\brooftop|skybar/i,                  'rooftopbar'],
+    [/\bborrel|kroeg|caf\u00e9|drankje|biertje|terras/i,'caf\u00e9'],
+    [/\bsushi|omakase/i,                   'sushirestaurant'],
+    [/\bramen|noedel|wok|dim sum/i,        'aziatisch restaurant'],
+    [/\bpizza/i,                           'pizzeria'],
+    [/\bpasta|italiaan/i,                  'italiaans restaurant'],
+    [/\btapas|spaans/i,                    'tapasbar'],
+    [/\bgrieks/i,                          'grieks restaurant'],
+    [/\bmexicaans/i,                       'mexicaans restaurant'],
+    [/\bindonesisch|rijsttafel/i,          'indonesisch restaurant'],
+    [/\bshoarma|falafel|kapsalon/i,        'shoarmazaak'],
+    [/\bburger/i,                          'burgerzaak'],
+    [/\bpok\u00e9|bowl food|salade/i,       'gezond restaurant'],
+    [/\bsteak|grill/i,                     'steakhouse'],
+    [/\boester|zeevruchten|visrestaurant/i,'visrestaurant'],
+    [/\bfrans|bistro/i,                    'frans restaurant'],
+    [/\bstreetfood|foodtruck|foodhal/i,    'streetfood'],
+    [/\bsnackbar|frietje|patat/i,          'snackbar'],
+    [/\bpannenkoek/i,                      'pannenkoekenrestaurant'],
+    [/\bontbijt|brunch|eggs benedict|bagel/i,'ontbijtzaak'],
+    [/\bfondue|kaasplank|kaas\b/i,         'kaaswinkel'],
+    [/\bsterrenrestaurant|fine dining|chef|tasting menu/i,'fine dining restaurant'],
+    [/\bdiner|restaurant|eten\b|lunch/i,   'restaurant'],
+    [/\bboekwinkel|boekhandel/i,           'boekwinkel'],
+    [/\bvintage|winkelen|etalage/i,        'vintage winkel'],
+    [/\bpark|picknick|gras|bankje|wandel|lopen|zonsonder|uitzicht|gracht|water|haven|natuur/i,'park'],
+    [/\bfiets/i,                           'fietsroute'],
+    [/\bhardloop|work-?out|bootcamp|yoga|sportveld|training/i,'sportschool'],
+    [/\bhotel(ontbijt|bar|brunch|spa)?\b|suite|boutique-hotel/i,'hotel'],
+    [/\bhelikopter|ballonvaart|priv\u00e9-jet/i,'uitkijkpunt'],
+    [/\buitkijkpunt|zonsopgang|sterren kijken|hoogste|uitzicht/i,'uitkijkpunt'],
+    [/\brommelmarkt|kringloop/i,           'kringloopwinkel'],
+    [/\bshoppen|winkels|deli\b/i,          'winkelstraat'],
+    [/\btuin\b|kas\b/i,                   'tuin'],
+    [/\bproeverij|tasting|degustatie/i,    'proeverij'],
+    [/\bhappy hour|voordrinken/i,          'caf\u00e9'],
+    [/\bbuurt|stad in|ontdekkingstocht|speurtocht|verkennen|dwaal|slenteren|rondje|route|tour|wandeling|straatkunst|street art/i,'bezienswaardigheid'],
+    [/\bkookles|kookworkshop|workshop/i,   'kookworkshop'],
+    [/\bstation|bus\b|tram\b/i,           'station'],
+    [/\bnachtwinkel|supermarkt|toko\b/i,   'supermarkt'],
+    [/\bspelletje|bordspel|spelcaf/i,      'spelletjescaf\u00e9'],
+    [/\bVR\b|virtual/i,                   'VR arcade'],
+    [/\bboksen|bokssles|personal train|fitness|spinning/i,'sportschool'],
+    [/\bskate|skeeler/i,                   'skatepark'],
+    [/\bduiken/i,                          'duikcentrum'],
+    [/\bpaardrij/i,                        'manege'],
+    [/\bracecircuit|wakeboard/i,           'kartbaan'],
+    [/\bimprovisatie|comedy/i,             'theater'],
+    [/\bfotoshoot|fotowandeling/i,         'bezienswaardigheid'],
+    [/\bthuis\b|balkon|op de kamer|zelf koken|opruimen/i,'supermarkt'],
+    [/\bsnoep|drop\b|koekje|cake\b|yoghurt|fruit|noten|banaan|granola|havermout|reep\b|snack/i,'supermarkt'],
+    [/\bdessert|toetje|tiramisu|cheesecake|appeltaart|souffl|cr\u00e8me br|churros|mochi|sorbet|bonbon/i,'dessertzaak'],
+    [/\bbar\b|lounge|drink|glas wijn|nachtcap|laatste rondje|aperitief/i,'bar'],
+    [/\beten|maaltijd|hap\b|dineren|wrap|soep|quiche|curry|tosti|eitjes|shakshuka|avocado|wentelteef/i,'restaurant'],
+    [/\bijs\b|ijsje|kokosijs|truffel-ijs/i,'ijssalon'],
+    [/\bpizza|afhaal/i,                    'pizzeria'],
+    [/\bcasino/i,                          'casino'],
+    [/\bclub\b|VIP-toegang|besloten/i,     'nachtclub'],
+    [/\bvoetbal|basketbal|trapveld|estafette|obstakelparcours|sprintje|push-up|boomklim/i,'sportveld'],
+    [/\bboks|cooling down|rekken|revanche|potje spelen|sportsessie|cryotherapie|jacuzzi/i,'sportschool'],
+    [/\bski\u00ebn|indoorhal/i,             'skihal'],
+    [/\battractie|evenement|rondleiding|urban exploring|telescoop|kaartje kopen/i,'bezienswaardigheid'],
+    [/\bnachtmarkt|marktkraam|boodschappen/i,'markt'],
+    [/\bkeuken|fine-dining|comfort food|sharing dishes|goedkoopste tent|healthy zaak|vis en groenten|kip en rijst/i,'restaurant'],
+    [/\bkaasplateau|port\b/i,              'kaaswinkel'],
+    [/\bkrentenbol|oliebol|popcorn/i,      'bakkerij'],
+    [/\bchoco\b|warme choco|chia|shake\b|sportdrank|sinaasappel/i,'supermarkt'],
+    [/\bhaardvuur|vuur\b|taxi\b/i,        'bar'],
+    [/\bbinnenwippen|verrassingsbar|onbekende tent|spontane|licht brandt|geheime locatie/i,'bar'],
+    [/\bnachtzwemmen/i,                    'zwembad'],
+    [/\btuinbezoek|tuin\b/i,               'tuin'],
+    [/\bVIP-ervaring|luxe activiteit/i,    'wellness'],
+    [/\bzoetigheid|ijssmaakje/i,           'ijssalon']
+  ];
+
+  // Sommige suggesties horen nergens bij een adres (thuis, onderweg, samen napraten).
+  // Daar heeft een Google Maps-resultaat geen zin.
+  // Suggesties die je thuis doet — daar hoort geen adres bij, en dat zeggen we er ook bij.
+  var thuisRegex = /serie kijken|aflevering|film kijken thuis|popcorn maken|niks doen|muziek opzetten|thee drinken bij iemand thuis|zelf koken|restjes opwarmen|tosti's bakken|eitjes bakken|balkon|op de kamer|samen opruimen|onder een deken|boek lezen|krantje lezen|havermout maken|soep maken|pasta koken|spelletje spelen|kaarten of een spelletje/i;
+
+  // Suggesties die onderweg of samen gebeuren, zonder vaste plek.
+  var onderwegRegex = /rustig (napraten(?! op| met)|kletsen op (straat|de bank)|samen naar huis|naar huis|terugwandelen|uitlopen|naar huis kuieren)|blijven (zitten|hangen)|terugfietsen|elkaar wegbrengen|muziek(je)? (delen|luisteren|op de terugweg)|vroeg naar huis|laatste blik|vreemden aanspreken|blind een plek|samen koken en meenemen|actief (blijven|afsluiten)|nog een activiteit erbij|actieve (start|afsluiter)|energiek tussendoortje|sportief startmoment|onverwachte plek|verrassingsstop|handje vasthouden|stretchen|cooling down|rekken en strekken|push-up|sprintje/i;
+
+  function geenLocatie(titel){
+    return thuisRegex.test(titel) || onderwegRegex.test(titel);
+  }
+
+  function zoektermVoor(titel, fallback){
+    if (geenLocatie(titel)) return null;
+    for (var i = 0; i < zoektermRegels.length; i++){
+      if (zoektermRegels[i][0].test(titel)) return zoektermRegels[i][1];
+    }
+    return fallback;
+  }
+
   async function fetchRealPlaces(){
     var statusEl = document.getElementById('places-status');
     if (!GOOGLE_MAPS_READY){
@@ -1108,6 +1258,7 @@
     }
 
     if (statusEl) statusEl.textContent = 'Bezig met zoeken op Google Maps\u2026';
+    var overgeslagen = 0;
 
     try {
       if (currentTheme){
@@ -1121,11 +1272,22 @@
         var queryTiers = placeQueryMap[sfeer] || placeQueryMap.gezellig;
         var queries = queryTiers[tier] || queryTiers.middel;
         for (var i = 0; i < activityCount; i++){
-          var queryCategory = queries[i % queries.length];
-          await applyPlaceToRow(i + 1, randomItem(queryCategory), stad);
+          var titelEl = document.getElementById('plan-title-' + (i + 1));
+          var getoondeTitel = titelEl ? titelEl.textContent : '';
+          var fallback = randomItem(queries[i % queries.length]);
+          var zoekterm = zoektermVoor(getoondeTitel, fallback);
+          if (zoekterm){
+            await applyPlaceToRow(i + 1, zoekterm, stad);
+          } else {
+            overgeslagen++;
+          }
         }
       }
-      if (statusEl) statusEl.textContent = 'Bijgewerkt met actuele locaties en openingstijden van Google Maps.';
+      if (statusEl){
+        statusEl.textContent = overgeslagen > 0
+          ? 'Bijgewerkt met echte locaties. ' + overgeslagen + (overgeslagen === 1 ? ' onderdeel heeft' : ' onderdelen hebben') + ' geen locatie nodig.'
+          : 'Bijgewerkt met actuele locaties en openingstijden van Google Maps.';
+      }
     } catch (err){
       console.error('Kon locaties niet ophalen:', err);
       if (statusEl) statusEl.textContent = err.message;
