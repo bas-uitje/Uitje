@@ -834,6 +834,7 @@
       titleLink.href = '#';
       titleLink.removeAttribute('data-adres');
       titleLink.removeAttribute('data-naam');
+      titleLink.removeAttribute('data-curated');
       document.getElementById('plan-time-' + i).textContent = tijden[i - 1];
 
       var subEl = document.getElementById('plan-sub-' + i);
@@ -867,6 +868,10 @@
       }
     }
 
+    // Eigen aanraders uit Supabase erin verwerken (niet bij een verrassingsthema).
+    if (!currentTheme){
+      applyCurated(stad, sfeer, tier, moment, aantal, thisGen);
+    }
   }
 
   // ===== PLAN BEVESTIGEN =====
@@ -1047,6 +1052,89 @@
 
     window.location.href = mailto;
     if (status) status.textContent = 'Je mailprogramma opent met het plan erin.';
+  }
+
+  // ===== EIGEN AANRADERS (tabel 'locaties' in Supabase) =====
+
+  var curatedCache = {};        // per stad: array met locaties
+  var STAP_NAMEN = ['start', 'eten', 'activiteit', 'toetje', 'afsluiter'];
+  var BUDGET_NAMEN = { budget: 'laag', middel: 'midden', luxe: 'hoog' };
+
+  async function loadCurated(stad){
+    var sleutel = (stad || '').toLowerCase();
+    if (curatedCache[sleutel]) return curatedCache[sleutel];
+    if (!SUPABASE_READY || !stad) return [];
+    try {
+      var url = SUPABASE_URL + '/rest/v1/locaties?stad=ilike.*' + encodeURIComponent(stad.trim()) + '*' +
+                '&actief=eq.true&select=naam,stad,stap,waarom,adres,budget,sfeer,dagdeel';
+      var res = await fetch(url, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      });
+      if (!res.ok){ curatedCache[sleutel] = []; return []; }
+      var data = await res.json();
+      curatedCache[sleutel] = Array.isArray(data) ? data : [];
+      return curatedCache[sleutel];
+    } catch (err){
+      console.error('Kon aanraders niet ophalen:', err);
+      return [];
+    }
+  }
+
+  // Past een locatie bij deze stap, dit budget, deze sfeer en dit dagdeel?
+  // Een leeg veld betekent: past overal bij.
+  // Een veld mag meerdere waarden bevatten, gescheiden door komma's: 'gezellig, romantisch'.
+  // Leeg betekent: past overal bij.
+  function lijst(v){
+    return (v || '').toString().split(',')
+      .map(function(x){ return x.trim().toLowerCase(); })
+      .filter(function(x){ return x.length > 0; });
+  }
+  function veldPast(veld, waarde){
+    var opties = lijst(veld);
+    return opties.length === 0 || opties.indexOf(waarde) !== -1;
+  }
+
+  function pastBij(loc, stapNaam, sfeer, tier, dagdeel){
+    if (!veldPast(loc.stap, stapNaam) || lijst(loc.stap).length === 0) return false;
+    if (!veldPast(loc.sfeer, sfeer)) return false;
+    if (!veldPast(loc.budget, BUDGET_NAMEN[tier])) return false;
+    if (!veldPast(loc.dagdeel, dagdeel)) return false;
+    return true;
+  }
+
+  async function applyCurated(stad, sfeer, tier, dagdeel, aantal, thisGen){
+    var locaties = await loadCurated(stad);
+    if (thisGen !== demoGenerationId) return;   // gebruiker heeft intussen iets veranderd
+    if (!locaties.length) return;
+
+    var gebruikt = {};
+    for (var i = 1; i <= aantal; i++){
+      var stapNaam = STAP_NAMEN[(i - 1) % STAP_NAMEN.length];
+      var kandidaten = locaties.filter(function(l){
+        return pastBij(l, stapNaam, sfeer, tier, dagdeel) && !gebruikt[l.naam];
+      });
+      if (!kandidaten.length) continue;
+      if (Math.random() > 0.7) continue;        // 70% kans: afwisseling blijft bestaan
+
+      var loc = randomItem(kandidaten);
+      gebruikt[loc.naam] = true;
+
+      var titleEl = document.getElementById('plan-title-' + i);
+      var subEl = document.getElementById('plan-sub-' + i);
+      if (!titleEl) continue;
+
+      titleEl.textContent = loc.naam;
+      titleEl.href = 'https://www.google.com/maps/search/?api=1&query=' +
+                     encodeURIComponent(loc.naam + ' ' + (loc.adres || loc.stad));
+      titleEl.setAttribute('data-curated', '1');
+      titleEl.setAttribute('data-naam', loc.naam);
+      if (loc.adres) titleEl.setAttribute('data-adres', loc.adres);
+      else titleEl.removeAttribute('data-adres');
+
+      if (subEl){
+        subEl.textContent = '\u2605 Aanrader' + (loc.waarom ? ' \u2014 ' + loc.waarom : '');
+      }
+    }
   }
 
   function surpriseMe(){
@@ -1275,6 +1363,7 @@
         var queries = queryTiers[tier] || queryTiers.middel;
         for (var i = 0; i < activityCount; i++){
           var titelEl = document.getElementById('plan-title-' + (i + 1));
+          if (titelEl && titelEl.getAttribute('data-curated') === '1') continue;
           var getoondeTitel = titelEl ? titelEl.textContent : '';
           var fallback = randomItem(queries[i % queries.length]);
           var zoekterm = zoektermVoor(getoondeTitel, fallback);
@@ -1444,6 +1533,7 @@
     titleEl.href = '#';
     titleEl.removeAttribute('data-adres');
     titleEl.removeAttribute('data-naam');
+    titleEl.removeAttribute('data-curated');
     if (subEl) subEl.textContent = 'Willekeurig gekozen \u2014 klik op \u{1F50D} om een echte locatie te zoeken';
   }
   document.addEventListener('DOMContentLoaded', function(){
