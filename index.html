@@ -395,7 +395,7 @@
           </div>
           <div class="chip-field">
             <label class="chip-label" for="sel-vervoer">Hoe reizen jullie?</label>
-            <select id="sel-vervoer" class="chip-select" onchange="updateDemo()">
+            <select id="sel-vervoer" class="chip-select" onchange="updateTransfers()">
               <option value="lopend" selected>lopend</option>
               <option value="fiets">op de fiets</option>
               <option value="auto">met de auto</option>
@@ -835,6 +835,7 @@
       titleLink.removeAttribute('data-adres');
       titleLink.removeAttribute('data-naam');
       titleLink.removeAttribute('data-curated');
+      wisCoordinaten(titleLink);
       document.getElementById('plan-time-' + i).textContent = tijden[i - 1];
 
       var subEl = document.getElementById('plan-sub-' + i);
@@ -857,16 +858,8 @@
     var placesStatus = document.getElementById('places-status');
     if (placesStatus) placesStatus.textContent = 'Nog niet gezocht \u2014 dit zijn voorbeeldnamen.';
 
-    var vervoerSel = document.getElementById('sel-vervoer');
-    var vervoer = vervoerSel ? vervoerSel.value : 'lopend';
-    var vInfo = vervoerMap[vervoer] || vervoerMap.lopend;
-    for (var t = 1; t < aantal; t++){
-      var transferEl = document.getElementById('transfer-' + t);
-      if (transferEl){
-        var mins = Math.max(1, Math.round(transferBasePattern[(t - 1) % transferBasePattern.length] * vInfo.factor));
-        transferEl.textContent = mins + ' min ' + vInfo.label;
-      }
-    }
+    // Reistijden pas tonen als er echte locaties zijn (zie updateTransfers).
+    updateTransfers();
 
     // Eigen aanraders uit Supabase erin verwerken (niet bij een verrassingsthema).
     if (!currentTheme){
@@ -896,6 +889,7 @@
         titel: titleEl.textContent,
         sub: subEl ? subEl.textContent : '',
         adres: titleEl.getAttribute('data-adres') || null,
+        uren: leesUren(titleEl),
         link: (titleEl.getAttribute('href') && titleEl.getAttribute('href') !== '#') ? titleEl.getAttribute('href') : null
       });
     }
@@ -1137,6 +1131,93 @@
     }
   }
 
+  // ===== ECHTE REISTIJDEN =====
+  // Berekend uit de coördinaten van de plekken. Hemelsbrede afstand x 1,3 als benadering
+  // van de echte route. Geen extra API nodig.
+  var SNELHEID_KMU = { lopend: 5, fiets: 15, auto: 25 };
+  var OMWEG_FACTOR = 1.3;
+
+  function zetCoordinaten(el, place){
+    if (place && place.location && typeof place.location.latitude === 'number'){
+      el.setAttribute('data-lat', place.location.latitude);
+      el.setAttribute('data-lng', place.location.longitude);
+    } else {
+      el.removeAttribute('data-lat');
+      el.removeAttribute('data-lng');
+    }
+    // Vaste openingstijden bewaren, zodat het afsluitscherm kan checken of een plek open is op de gekozen datum.
+    if (place && place.regularOpeningHours && place.regularOpeningHours.periods){
+      el.setAttribute('data-uren', JSON.stringify(place.regularOpeningHours.periods));
+    } else {
+      el.removeAttribute('data-uren');
+    }
+  }
+
+  function leesUren(el){
+    try {
+      var raw = el.getAttribute('data-uren');
+      return raw ? JSON.parse(raw) : null;
+    } catch (err){ return null; }
+  }
+
+  function wisCoordinaten(el){
+    if (!el) return;
+    el.removeAttribute('data-lat');
+    el.removeAttribute('data-lng');
+    el.removeAttribute('data-uren');
+  }
+
+  function leesCoordinaten(rowIndex){
+    var el = document.getElementById('plan-title-' + rowIndex);
+    if (!el || !el.getAttribute('data-lat')) return null;
+    return { lat: parseFloat(el.getAttribute('data-lat')), lng: parseFloat(el.getAttribute('data-lng')) };
+  }
+
+  function afstandKm(a, b){
+    var R = 6371, rad = Math.PI / 180;
+    var dLat = (b.lat - a.lat) * rad, dLng = (b.lng - a.lng) * rad;
+    var x = Math.pow(Math.sin(dLat / 2), 2) +
+            Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.pow(Math.sin(dLng / 2), 2);
+    return 2 * R * Math.asin(Math.sqrt(x));
+  }
+
+  function updateTransfers(){
+    var vervoerSel = document.getElementById('sel-vervoer');
+    var vervoer = vervoerSel ? vervoerSel.value : 'lopend';
+    var vInfo = vervoerMap[vervoer] || vervoerMap.lopend;
+    var snelheid = SNELHEID_KMU[vervoer] || 5;
+
+    for (var t = 1; t < activityCount; t++){
+      var el = document.getElementById('transfer-' + t);
+      if (!el) continue;
+      var a = leesCoordinaten(t), b = leesCoordinaten(t + 1);
+      if (!a || !b){
+        el.textContent = '';
+        el.style.display = 'none';
+        continue;
+      }
+      var km = afstandKm(a, b) * OMWEG_FACTOR;
+      var min = Math.max(1, Math.round(km / snelheid * 60));
+      var kmTekst = km < 1 ? Math.round(km * 1000) + ' m' : km.toFixed(1).replace('.', ',') + ' km';
+      var tekst = 'ca. ' + min + ' min ' + vInfo.label + ' (' + kmTekst + ')';
+      if (vervoer === 'lopend' && min > 30) tekst += ' \u2014 ver lopen, fiets is handiger';
+      el.textContent = tekst;
+      el.style.display = '';
+    }
+  }
+
+  // Een aanrader heeft alleen een adres. Voor de reistijd halen we eenmalig de coördinaten op.
+  async function plaatsAanraderOpKaart(el, stad){
+    if (el.getAttribute('data-lat')) return;
+    var zoek = (el.getAttribute('data-naam') || el.textContent) + ' ' + (el.getAttribute('data-adres') || '') + ' ' + stad;
+    try {
+      var place = await searchPlace(zoek);
+      zetCoordinaten(el, place);
+    } catch (err){
+      console.error('Kon aanrader niet op de kaart zetten:', err);
+    }
+  }
+
   function surpriseMe(){
     var stadSel = document.getElementById('sel-stad');
     var realCities = [];
@@ -1178,7 +1259,7 @@
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
-        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.currentOpeningHours.openNow,places.googleMapsUri'
+        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.regularOpeningHours.periods,places.googleMapsUri,places.location'
       },
       body: JSON.stringify({ textQuery: query, languageCode: 'nl' })
     });
@@ -1363,7 +1444,10 @@
         var queries = queryTiers[tier] || queryTiers.middel;
         for (var i = 0; i < activityCount; i++){
           var titelEl = document.getElementById('plan-title-' + (i + 1));
-          if (titelEl && titelEl.getAttribute('data-curated') === '1') continue;
+          if (titelEl && titelEl.getAttribute('data-curated') === '1'){
+            await plaatsAanraderOpKaart(titelEl, stad);
+            continue;
+          }
           var getoondeTitel = titelEl ? titelEl.textContent : '';
           var fallback = randomItem(queries[i % queries.length]);
           var zoekterm = zoektermVoor(getoondeTitel, fallback);
@@ -1374,6 +1458,7 @@
           }
         }
       }
+      updateTransfers();
       if (statusEl){
         statusEl.textContent = overgeslagen > 0
           ? 'Bijgewerkt met echte locaties. ' + overgeslagen + (overgeslagen === 1 ? ' onderdeel heeft' : ' onderdelen hebben') + ' geen locatie nodig.'
@@ -1395,14 +1480,11 @@
       titleEl.textContent = name;
       titleEl.href = place.googleMapsUri || '#';
 
-      var openStatus = '';
-      if (place.currentOpeningHours && typeof place.currentOpeningHours.openNow === 'boolean'){
-        openStatus = place.currentOpeningHours.openNow ? 'Nu open' : 'Nu gesloten';
-      }
-      subEl.textContent = [place.formattedAddress, openStatus].filter(Boolean).join(' \u2014 ');
+      subEl.textContent = place.formattedAddress || '';
       // Adres apart bewaren voor routebeschrijvingen later in de flow.
       titleEl.setAttribute('data-adres', place.formattedAddress || '');
       titleEl.setAttribute('data-naam', name);
+      zetCoordinaten(titleEl, place);
       return name;
     } else {
       titleEl.textContent = 'Geen resultaat gevonden voor: ' + query;
@@ -1410,6 +1492,7 @@
       subEl.textContent = '';
       titleEl.removeAttribute('data-adres');
       titleEl.removeAttribute('data-naam');
+      wisCoordinaten(titleEl);
       return null;
     }
   }
@@ -1449,6 +1532,7 @@
 
     try {
       var name = await applyPlaceToRow(rowIndex, query, stad);
+      updateTransfers();
       if (statusEl){
         statusEl.textContent = name ? ('Bijgewerkt met "' + name + '" van Google Maps.') : 'Niks gevonden voor die zoekopdracht.';
       }
@@ -1534,6 +1618,8 @@
     titleEl.removeAttribute('data-adres');
     titleEl.removeAttribute('data-naam');
     titleEl.removeAttribute('data-curated');
+    wisCoordinaten(titleEl);
+    updateTransfers();
     if (subEl) subEl.textContent = 'Willekeurig gekozen \u2014 klik op \u{1F50D} om een echte locatie te zoeken';
   }
   document.addEventListener('DOMContentLoaded', function(){

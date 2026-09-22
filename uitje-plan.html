@@ -130,6 +130,10 @@
   .fi-text strong{display:block;font-size:15.5px;font-weight:600;}
   .fi-text span{font-size:13px;color:var(--muted);}
   .fi-route{padding:6px 0 6px 66px;font-size:13px;}
+  .fi-open{display:block;margin-top:4px;font-size:13px;font-weight:600;color:var(--green);}
+  .fi-dicht{display:block;margin-top:4px;font-size:13px;font-weight:600;color:#B4541A;}
+  .fi-waarschuwing{margin:0 0 16px;padding:12px 14px;border-radius:var(--radius-md);
+    background:#FFF8E6;border:1px solid var(--amber);font-size:14px;color:#6B5410;}
   .fi-route a{color:var(--coral);text-decoration:none;font-weight:600;}
   .fi-route a:hover{text-decoration:underline;}
   .feedback-box{
@@ -605,6 +609,39 @@
     } catch (err){ return dateStr; }
   }
 
+  // ===== OPENINGSTIJDEN OP DE GEKOZEN DATUM =====
+  function tijdInMinuten(t){
+    if (!t || t.indexOf(':') === -1) return null;
+    var p = t.split(':');
+    var h = parseInt(p[0], 10), m = parseInt(p[1], 10);
+    if (isNaN(h) || isNaN(m)) return null;
+    return h * 60 + m;
+  }
+
+  // Geeft true (open), false (dicht) of null (onbekend) terug.
+  // 'periods' komt van Google: dag 0 = zondag. Lege velden betekenen 0.
+  function isOpenOp(periods, datum, dagOffset, tijd){
+    if (!periods || !periods.length || !datum) return null;
+    var minuten = tijdInMinuten(tijd);
+    if (minuten === null) return null;
+
+    var d = new Date(datum + 'T12:00:00');
+    d.setDate(d.getDate() + (dagOffset || 0));
+    var WEEK = 7 * 1440;
+    var t = d.getDay() * 1440 + minuten;
+
+    for (var i = 0; i < periods.length; i++){
+      var p = periods[i];
+      if (!p.open) continue;
+      if (!p.close) return true;   // dag en nacht open
+      var o = (p.open.day || 0) * 1440 + (p.open.hour || 0) * 60 + (p.open.minute || 0);
+      var s = (p.close.day || 0) * 1440 + (p.close.hour || 0) * 60 + (p.close.minute || 0);
+      if (s <= o) s += WEEK;       // sluit na zondag-middernacht
+      if ((t >= o && t < s) || (t + WEEK >= o && t + WEEK < s)) return true;
+    }
+    return false;
+  }
+
   function renderFinalScreen(){
     if (!lockedDate || !planItems || !planItems.items) return;
 
@@ -620,15 +657,31 @@
     var items = planItems.items;
     var html = '';
     var anyRoute = false;
+    var dagOffset = 0, vorigeMin = -1, geslotenTeller = 0;
 
     items.forEach(function(it, idx){
       var titel = it.link
         ? '<a href="' + it.link + '" target="_blank" rel="noopener" style="color:inherit;">' + it.titel + '</a>'
         : it.titel;
+
+      // Loopt het plan over middernacht heen, dan hoort het item bij de volgende dag.
+      var minNu = tijdInMinuten(it.tijd);
+      if (minNu !== null && vorigeMin !== -1 && minNu < vorigeMin) dagOffset++;
+      if (minNu !== null) vorigeMin = minNu;
+
+      var status = '';
+      var open = isOpenOp(it.uren, lockedDate, dagOffset, it.tijd);
+      if (open === true){
+        status = '<span class="fi-open">Open om ' + it.tijd + '</span>';
+      } else if (open === false){
+        status = '<span class="fi-dicht">Gesloten om ' + it.tijd + ' \u2014 kies een ander tijdstip of plek</span>';
+        geslotenTeller++;
+      }
+
       html += '<div class="fi-row">' +
         '<div class="fi-time">' + (it.tijd || '') + '</div>' +
         '<div class="fi-text"><strong>' + titel + '</strong>' +
-        (it.sub ? '<span>' + it.sub + '</span>' : '') + '</div></div>';
+        (it.sub ? '<span>' + it.sub + '</span>' : '') + status + '</div></div>';
 
       if (idx < items.length - 1){
         var routeUrl = buildRouteLink(it, items[idx + 1], vervoer);
@@ -642,6 +695,11 @@
       }
     });
 
+    if (geslotenTeller > 0){
+      html = '<p class="fi-waarschuwing">Let op: ' + geslotenTeller +
+        (geslotenTeller === 1 ? ' plek is' : ' plekken zijn') +
+        ' volgens Google gesloten op het geplande tijdstip.</p>' + html;
+    }
     document.getElementById('final-itinerary').innerHTML = html;
 
     var note = document.getElementById('final-route-note');
