@@ -1253,7 +1253,16 @@
     updateDemo();
   }
 
+  // Onthoud zoekresultaten tijdens het bezoek: dezelfde zoekopdracht kost dan geen tweede keer quotum.
+  var zoekCache = {};
+  var QUOTUM_OP = false;
+
   async function searchPlace(query){
+    var sleutel = query.trim().toLowerCase();
+    if (zoekCache.hasOwnProperty(sleutel)) return zoekCache[sleutel];
+    if (QUOTUM_OP){
+      var e0 = new Error('quotum'); e0.quotum = true; throw e0;
+    }
     var res = await fetch('https://places.googleapis.com/v1/places:searchText', {
       method: 'POST',
       headers: {
@@ -1265,10 +1274,23 @@
     });
     if (!res.ok){
       var errText = await res.text();
-      throw new Error('Google Maps fout (' + res.status + '): ' + errText);
+      console.error('Google Maps fout (' + res.status + '):', errText);   // details alleen voor jou, in de console
+      var e = new Error('zoekfout');
+      if (res.status === 429){ QUOTUM_OP = true; e.quotum = true; }
+      throw e;
     }
     var data = await res.json();
-    return (data.places && data.places.length > 0) ? data.places[0] : null;
+    var resultaat = (data.places && data.places.length > 0) ? data.places[0] : null;
+    zoekCache[sleutel] = resultaat;
+    return resultaat;
+  }
+
+  // Een begrijpelijke zin voor de bezoeker, nooit de technische foutmelding.
+  function zoekFoutTekst(err){
+    if (err && err.quotum){
+      return 'Echte locaties opzoeken lukt vandaag even niet meer. Je plan werkt verder gewoon; probeer het zoeken morgen opnieuw.';
+    }
+    return 'Echte locaties opzoeken lukte nu niet. Probeer het zo nog eens.';
   }
 
   // Vertaalt de GETOONDE suggestie naar een passende Google Maps-zoekterm.
@@ -1466,7 +1488,8 @@
       }
     } catch (err){
       console.error('Kon locaties niet ophalen:', err);
-      if (statusEl) statusEl.textContent = err.message;
+      updateTransfers();   // wat al wél gevonden is, krijgt gewoon zijn reistijd
+      if (statusEl) statusEl.textContent = zoekFoutTekst(err);
     }
   }
 
@@ -1539,7 +1562,7 @@
       logCustomSearch(query, stad, !!name);
     } catch (err){
       console.error('Kon locatie niet ophalen:', err);
-      if (statusEl) statusEl.textContent = err.message;
+      if (statusEl) statusEl.textContent = zoekFoutTekst(err);
       logCustomSearch(query, stad, false);
     }
   }
