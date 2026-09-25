@@ -15,9 +15,9 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Uitje — Wanneer kan iedereen?">
 <meta property="og:description" content="Deel een linkje en laat iedereen doorgeven wanneer het uitkomt.">
-<meta property="og:image" content="./og-image.png">
+<meta property="og:image" content="https://uitjemaker.nl/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="./og-image.png">
+<meta name="twitter:image" content="https://uitjemaker.nl/og-image.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -150,6 +150,12 @@
   .fb-btn:hover{border-color:var(--coral);color:var(--coral);background:var(--coral-soft);}
   .fb-btn.chosen{border-color:var(--coral);background:var(--coral);color:#fff;}
   .feedback-extra{display:none;margin-top:14px;}
+  .mijn-plan{display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:14px 16px;margin-bottom:10px;border:1.5px solid var(--line-soft);border-radius:var(--radius-md);
+    background:var(--surface);text-decoration:none;color:var(--ink);box-shadow:var(--shadow-sm);}
+  .mijn-plan:hover{border-color:var(--coral);}
+  .mijn-plan strong{font-size:15px;font-weight:600;}
+  .mijn-plan span{font-size:13px;color:var(--muted);white-space:nowrap;}
   .weather-note{
     margin:16px 0 0;padding:12px 14px;border-radius:var(--radius-md);
     background:#FFF8E6;border:1px solid var(--amber);font-size:14px;color:#6B5410;
@@ -180,11 +186,17 @@
   </div>
 
   <!-- SETUP: alleen zichtbaar voordat er een linkje bestaat -->
+  <div class="block" id="mijn-plannen-block" style="display:none;">
+    <p class="demo-col-label">Je plannen</p>
+    <div id="mijn-plannen"></div>
+  </div>
+
   <div class="block" id="setup-block">
     <p class="microcopy" id="no-plan-note" style="display:none;margin-bottom:16px;">
       Nog geen plan bevestigd? <a href="./index.html#plannen" style="color:var(--coral);text-decoration:underline;">Maak eerst je Uitje</a> &#8212; dan zien je vrienden meteen waar het over gaat.
     </p>
     <p class="demo-col-label">Kies je datums</p>
+    <p class="microcopy" id="tijdstip-uit-plan" style="display:none;margin-bottom:14px;"></p>
 
     <div class="field-row">
       <label for="setup-tijdstip">Tijdstip</label>
@@ -227,7 +239,7 @@
     </div>
     <p class="microcopy" id="share-note">Deel dit met je vrienden.</p>
     <p class="microcopy demo-note" id="setup-note" style="display:none;">Let op: er is nu een storing, dit linkje werkt tijdelijk niet. Probeer het later opnieuw.</p>
-    <p class="microcopy"><a href="#" onclick="startNewPlan(); return false;" style="color:var(--blue); text-decoration:underline;">Nieuw plan starten (nieuw linkje)</a></p>
+    <p class="microcopy"><a href="#" onclick="startNewPlan(); return false;" style="color:var(--blue); text-decoration:underline;">Nog een plan maken</a></p>
   </div>
 
   <!-- ZIJ VULLEN IN: alleen zichtbaar via het gedeelde linkje -->
@@ -261,9 +273,7 @@
     <p class="tijdstip-note" id="result-tijdstip-note"></p>
     <div class="chip-row" id="result-chips"></div>
     <p class="result-text" id="result-text"></p>
-    <div class="share-box" id="lock-box" style="display:none;margin-top:18px;">
-      <button type="button" class="nav-btn" id="lock-btn" onclick="lockInDate()">Zet deze datum vast</button>
-    </div>
+    <div class="share-box" id="lock-box" style="display:none;margin-top:18px;"></div>
   </div>
 
   <!-- AFSLUITSCHERM -->
@@ -315,6 +325,74 @@
   var SUPABASE_URL = 'https://bnbgceutzjypumstzdri.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_ZMe6lfs6wx1E2EapJeT5QA_GDIbN6r7';
   var SUPABASE_READY = SUPABASE_URL.indexOf('VUL-IN') === -1 && SUPABASE_ANON_KEY.indexOf('VUL-IN') === -1;
+
+  // ===== VEILIGHEID =====
+  // Alles wat uit de database komt, wordt eerst onschadelijk gemaakt voordat het op het scherm komt.
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch){
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+  }
+  function veiligeUrl(u){
+    return (typeof u === 'string' && /^https:\/\/[^\s"'<>]+$/i.test(u)) ? u : null;
+  }
+  function geldigeDatum(d){
+    return typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d);
+  }
+  function lokaleDatum(dt){
+    var d = dt || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function korteDatum(iso){
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || '')) return '';
+    return new Date(iso + 'T12:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+  }
+
+  // ===== DATABASE: alleen via vaste loketten, nooit vrij lezen =====
+  async function rpc(naam, body){
+    var res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + naam, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error('rpc ' + naam + ' ' + res.status);
+    return res.json();
+  }
+
+  function nieuwToken(){
+    var bytes = new Uint8Array(18);
+    (window.crypto || window.msCrypto).getRandomValues(bytes);
+    return Array.prototype.map.call(bytes, function(b){ return ('0' + b.toString(16)).slice(-2); }).join('');
+  }
+
+  // ===== EIGEN PLANNEN: meerdere tegelijk, per browser onthouden =====
+  var MIJN_KEY = 'uitje_mijn_plannen';
+  function mijnPlannen(){
+    try { return JSON.parse(localStorage.getItem(MIJN_KEY) || '[]'); } catch (err){ return []; }
+  }
+  function bewaarMijnPlan(p){
+    var lijst = mijnPlannen().filter(function(x){ return x.code !== p.code; });
+    lijst.unshift(p);
+    try { localStorage.setItem(MIJN_KEY, JSON.stringify(lijst.slice(0, 20))); } catch (err){}
+  }
+  function vindMijnPlan(code){
+    var gevonden = null;
+    mijnPlannen().forEach(function(p){ if (p.code === code) gevonden = p; });
+    return gevonden;
+  }
+  function migreerOudPlan(){
+    // Oudere versie bewaarde één code zonder beheersleutel. Opnemen in de lijst (zonder vastzet-recht).
+    try {
+      var oud = localStorage.getItem('uitje_eigen_plan_code');
+      if (oud && !vindMijnPlan(oud)) bewaarMijnPlan({ code: oud, token: null, titel: 'Eerder plan', datum: '' });
+      localStorage.removeItem('uitje_eigen_plan_code');
+    } catch (err){}
+  }
 
   var TIJDSTIP_LABELS = { ochtend: "'s ochtends", middag: "'s middags", avond: "'s avonds" };
 
@@ -400,7 +478,7 @@
     var note = document.getElementById('weather-note');
     if (!note) return;
     var sfeerPool = weerActiviteitenRegen[plan.sfeer] || weerActiviteitenRegen.gezellig;
-    note.innerHTML = '<strong>Regen verwacht in ' + plan.stad + ' vandaag.</strong> ' +
+    note.innerHTML = '<strong>Regen verwacht in ' + esc(plan.stad) + ' vandaag.</strong> ' +
       'Overweeg een binnenactiviteit, bijvoorbeeld: ' + sfeerPool.slice(0, 3).join(', ').toLowerCase() + '.';
     note.style.display = 'block';
   }
@@ -415,18 +493,20 @@
     if (!block || !container) return;
 
     var sumText = 'Voor ' + plan.personen + (plan.personen === 1 ? ' persoon' : ' personen') + ' in ' + plan.stad;
-    if (plan.thema) sumText += ' \u2014 ' + plan.thema;
+    if (plan.idee) sumText += ' \u2014 ' + plan.idee;
+    else if (plan.thema) sumText += ' \u2014 ' + plan.thema;
     if (summary) summary.textContent = sumText;
 
     var html = '';
     plan.items.forEach(function(it){
-      var titel = it.link
-        ? '<a href="' + it.link + '" target="_blank" rel="noopener" style="color:inherit;">' + it.titel + '</a>'
-        : it.titel;
+      var link = veiligeUrl(it.link);
+      var titel = link
+        ? '<a href="' + esc(link) + '" target="_blank" rel="noopener" style="color:inherit;">' + esc(it.titel) + '</a>'
+        : esc(it.titel);
       html += '<div class="pp-row">' +
-        '<div class="pp-time">' + (it.tijd || '') + '</div>' +
+        '<div class="pp-time">' + esc(it.tijd) + '</div>' +
         '<div class="pp-text"><strong>' + titel + '</strong>' +
-        (it.sub ? '<span>' + it.sub + '</span>' : '') + '</div></div>';
+        (it.sub ? '<span>' + esc(it.sub) + '</span>' : '') + '</div></div>';
     });
     container.innerHTML = html;
     block.style.display = 'block';
@@ -458,20 +538,19 @@
   async function createPlanFromSetup(){
     var status = document.getElementById('setup-status');
     var dates = collectSetupDates();
-    // dubbele datums eruit filteren en op volgorde zetten
-    dates = dates.filter(function(d, i){ return dates.indexOf(d) === i; }).sort();
+    dates = dates.filter(function(d, i){ return geldigeDatum(d) && dates.indexOf(d) === i; }).sort();
     if (dates.length < 2){
       if (status) status.textContent = 'Vul minstens 2 verschillende datums in.';
       return;
     }
-    var tijdstip = document.getElementById('setup-tijdstip').value;
     if (!planItems) planItems = loadConfirmedPlan();
+    // Staat het dagdeel al in het plan, dan niet opnieuw vragen.
+    var tijdstip = (planItems && planItems.dagdeel) ? planItems.dagdeel : document.getElementById('setup-tijdstip').value;
 
     var chars = 'abcdefghijkmnpqrstuvwxyz23456789';
     var code = '';
-    for (var i = 0; i < 6; i++){
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    for (var i = 0; i < 6; i++){ code += chars.charAt(Math.floor(Math.random() * chars.length)); }
+    var token = nieuwToken();
 
     if (SUPABASE_READY){
       try {
@@ -483,34 +562,37 @@
             'Content-Type': 'application/json',
             'Prefer': 'return=minimal'
           },
-          body: JSON.stringify({ id: code, dates: dates, tijdstip: tijdstip, plan_items: planItems })
+          body: JSON.stringify({ id: code, dates: dates, tijdstip: tijdstip, plan_items: planItems, beheer_token: token })
         });
         if (!res.ok){
-          var errText = await res.text();
-          console.error('Supabase fout bij plan aanmaken:', res.status, errText);
-          if (status) status.textContent = 'Fout (' + res.status + '): ' + errText;
+          console.error('Supabase fout bij plan aanmaken:', res.status, await res.text());
+          if (status) status.textContent = 'Het linkje maken lukte niet. Probeer het zo nog eens.';
           return;
         }
       } catch (err){
         console.error('Kon plan niet aanmaken:', err);
-        if (status) status.textContent = 'Netwerkfout: ' + err.message;
+        if (status) status.textContent = 'Geen verbinding. Probeer het zo nog eens.';
         return;
       }
     }
 
-    planCode = code;
-    planDates = dates;
-    planTijdstip = tijdstip;
-    try {
-      localStorage.setItem('uitje_eigen_plan_code', code);
-    } catch (err) { /* localStorage niet beschikbaar */ }
+    bewaarMijnPlan({
+      code: code, token: token,
+      titel: (planItems && (planItems.idee || planItems.stad)) ? [planItems.idee, planItems.stad].filter(Boolean).join(' \u00b7 ') : 'Datumprikker',
+      datum: lokaleDatum()
+    });
 
-    showBlock('setup-block', false);
-    showShareBlock();
-    showBlock('respond-block', true);
-    renderDatePicker();
-    renderResultChips();
-    refreshResults();
+    // Kwam dit plan uit een groepsstemming? Koppel ze, dan leidt het stemlinkje vanzelf hierheen.
+    try {
+      var bron = JSON.parse(localStorage.getItem('uitje_van_stemming') || 'null');
+      if (bron && bron.code && bron.token){
+        await rpc('link_poll_to_plan', { p_poll_id: bron.code, p_token: bron.token, p_plan_id: code });
+      }
+      localStorage.removeItem('uitje_van_stemming');
+    } catch (err){ console.error('Koppelen aan stemming mislukt:', err); }
+
+    // Organisator gebruikt voortaan hetzelfde linkje als iedereen.
+    window.location.href = buildShareLink(code);
   }
 
   function showShareBlock(){
@@ -519,16 +601,11 @@
     var setupNote = document.getElementById('setup-note');
     if (setupNote) setupNote.style.display = SUPABASE_READY ? 'none' : 'block';
     showBlock('share-block', true);
-    showBlock('result-block', true);
   }
 
   function startNewPlan(){
-    try { localStorage.removeItem('uitje_eigen_plan_code'); } catch (err) { /* no-op */ }
-    if (getPlanCodeFromURL()){
-      window.location.href = window.location.origin + window.location.pathname;
-      return;
-    }
-    window.location.reload();
+    // Eerdere plannen blijven bewaard; je start alleen een nieuwe.
+    window.location.href = window.location.origin + window.location.pathname;
   }
 
   function copyShareLink(){
@@ -570,12 +647,8 @@
   async function fetchPlanInfo(code){
     if (!SUPABASE_READY) return null;
     try {
-      var res = await fetch(SUPABASE_URL + '/rest/v1/plans?id=eq.' + encodeURIComponent(code) + '&select=dates,tijdstip,plan_items', {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
-      });
-      var data = await res.json();
-      if (data && data.length > 0) return data[0];
-      return null;
+      var data = await rpc('get_plan', { p_id: code });
+      return (data && data.length > 0) ? data[0] : null;
     } catch (err){
       console.error('Kon plan niet ophalen:', err);
       return null;
@@ -660,9 +733,10 @@
     var dagOffset = 0, vorigeMin = -1, geslotenTeller = 0;
 
     items.forEach(function(it, idx){
-      var titel = it.link
-        ? '<a href="' + it.link + '" target="_blank" rel="noopener" style="color:inherit;">' + it.titel + '</a>'
-        : it.titel;
+      var veiligeLink = veiligeUrl(it.link);
+      var titel = veiligeLink
+        ? '<a href="' + esc(veiligeLink) + '" target="_blank" rel="noopener" style="color:inherit;">' + esc(it.titel) + '</a>'
+        : esc(it.titel);
 
       // Loopt het plan over middernacht heen, dan hoort het item bij de volgende dag.
       var minNu = tijdInMinuten(it.tijd);
@@ -672,23 +746,23 @@
       var status = '';
       var open = isOpenOp(it.uren, lockedDate, dagOffset, it.tijd);
       if (open === true){
-        status = '<span class="fi-open">Open om ' + it.tijd + '</span>';
+        status = '<span class="fi-open">Open om ' + esc(it.tijd) + '</span>';
       } else if (open === false){
-        status = '<span class="fi-dicht">Gesloten om ' + it.tijd + ' \u2014 kies een ander tijdstip of plek</span>';
+        status = '<span class="fi-dicht">Gesloten om ' + esc(it.tijd) + ' \u2014 kies een ander tijdstip of plek</span>';
         geslotenTeller++;
       }
 
       html += '<div class="fi-row">' +
-        '<div class="fi-time">' + (it.tijd || '') + '</div>' +
+        '<div class="fi-time">' + esc(it.tijd) + '</div>' +
         '<div class="fi-text"><strong>' + titel + '</strong>' +
-        (it.sub ? '<span>' + it.sub + '</span>' : '') + status + '</div></div>';
+        (it.sub ? '<span>' + esc(it.sub) + '</span>' : '') + status + '</div></div>';
 
       if (idx < items.length - 1){
         var routeUrl = buildRouteLink(it, items[idx + 1], vervoer);
         if (routeUrl){
           anyRoute = true;
-          html += '<div class="fi-route">\u2193 <a href="' + routeUrl + '" target="_blank" rel="noopener">' +
-            (TRAVEL_LABELS[vervoer] || 'Route') + ' naar ' + items[idx + 1].titel + '</a></div>';
+          html += '<div class="fi-route">\u2193 <a href="' + esc(routeUrl) + '" target="_blank" rel="noopener">' +
+            esc((TRAVEL_LABELS[vervoer] || 'Route') + ' naar ' + items[idx + 1].titel) + '</a></div>';
         } else {
           html += '<div class="fi-route" style="color:var(--muted);">\u2193 naar de volgende plek</div>';
         }
@@ -729,20 +803,33 @@
     return lines.join('\n');
   }
 
-  async function lockInDate(){
-    var bestDate = document.getElementById('lock-btn').getAttribute('data-date');
-    if (!bestDate) return;
-    lockedDate = bestDate;
-
-    if (!planItems){
-      // Geen gekoppeld plan: alleen de datum bevestigen.
+  async function lockInDate(datum){
+    var mijn = vindMijnPlan(planCode);
+    if (!geldigeDatum(datum) || !mijn || !mijn.token) return;
+    var knoppen = document.getElementById('lock-box');
+    try {
+      var gelukt = await rpc('lock_plan_date', { p_id: planCode, p_token: mijn.token, p_date: datum });
+      if (gelukt !== true) throw new Error('niet toegestaan');
+    } catch (err){
+      console.error('Vastzetten mislukt:', err);
       var rt = document.getElementById('result-text');
-      if (rt) rt.innerHTML = '<strong>Vastgezet: ' + formatDateLongNL(bestDate) + '</strong>';
-      document.getElementById('lock-box').style.display = 'none';
+      if (rt) rt.textContent = 'Vastzetten lukte niet. Probeer het zo nog eens.';
       return;
     }
-    document.getElementById('lock-box').style.display = 'none';
-    renderFinalScreen();
+    lockedDate = datum;
+    if (knoppen) knoppen.style.display = 'none';
+    toonVastgezet();
+  }
+
+  // Zichtbaar voor iedereen zodra de datum vastligt: het afsluitscherm, en geen invulformulier meer.
+  function toonVastgezet(){
+    var intro = document.querySelector('.lede2');
+    if (intro) intro.style.display = 'none';
+    showBlock('respond-block', false);
+    showBlock('plan-preview-block', false);
+    var rt = document.getElementById('result-text');
+    if (rt) rt.innerHTML = '<strong>Vastgezet: ' + esc(formatDateLongNL(lockedDate)) + '</strong>';
+    if (planItems && planItems.items && planItems.items.length) renderFinalScreen();
   }
 
   // ===== FEEDBACK =====
@@ -824,6 +911,19 @@
     return dateStr.replace(/-/g, '') + 'T' + hh + mm + '00';
   }
 
+  function icsTekst(s){
+    return String(s == null ? '' : s)
+      .replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,')
+      .replace(/\r?\n/g, '\\n');
+  }
+  function icsVouw(regel){
+    // Agendaregels mogen maximaal 75 tekens zijn; langer = doorlopen op een nieuwe regel met een spatie.
+    var uit = [], rest = regel;
+    while (rest.length > 74){ uit.push(rest.slice(0, 74)); rest = ' ' + rest.slice(74); }
+    uit.push(rest);
+    return uit.join('\r\n');
+  }
+
   function downloadICS(){
     if (!lockedDate || !planItems) return;
     var items = planItems.items;
@@ -836,7 +936,7 @@
     var endH = String(Math.floor(endMins / 60) % 24).padStart(2, '0');
     var endM = String(endMins % 60).padStart(2, '0');
 
-    var desc = finalPlanAsText().replace(/\n/g, '\\n');
+    var desc = icsTekst(finalPlanAsText());
     var loc = items.length && items[0].adres ? items[0].adres : planItems.stad;
 
     var ics = [
@@ -848,12 +948,12 @@
       'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z',
       'DTSTART:' + icsTimestamp(lockedDate, startTime),
       'DTEND:' + lockedDate.replace(/-/g,'') + 'T' + endH + endM + '00',
-      'SUMMARY:Uitje in ' + planItems.stad,
+      'SUMMARY:' + icsTekst('Uitje in ' + planItems.stad),
       'DESCRIPTION:' + desc,
-      'LOCATION:' + loc,
+      'LOCATION:' + icsTekst(loc),
       'END:VEVENT',
       'END:VCALENDAR'
-    ].join('\r\n');
+    ].map(icsVouw).join('\r\n');
 
     var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
     var url = URL.createObjectURL(blob);
@@ -874,7 +974,7 @@
     catch (err) { return false; }
   }
 
-  function markAlreadyResponded(){
+  function markAlreadyResponded(naamNet){
     var block = document.getElementById('respond-block');
     if (!block) return;
     var picker = document.getElementById('date-picker');
@@ -890,7 +990,8 @@
       btn.style.cursor = 'default';
     }
     var status = document.getElementById('resp-status');
-    if (status) status.innerHTML = 'Je hebt al ingevuld. <a href="#" onclick="resetMyResponse(); return false;" style="color:var(--coral);text-decoration:underline;">Opnieuw invullen</a>';
+    var begin = naamNet ? 'Bedankt ' + esc(naamNet) + '! Je beschikbaarheid is opgeslagen.' : 'Je hebt al ingevuld.';
+    if (status) status.innerHTML = begin + ' <a href="#" onclick="resetMyResponse(); return false;" style="color:var(--coral);text-decoration:underline;">Aanpassen</a>';
   }
 
   function resetMyResponse(){
@@ -902,13 +1003,13 @@
     var container = document.getElementById('date-picker');
     if (!container) return;
     var html = '';
-    planDates.forEach(function(d){
-      html += '<button type="button" class="date-chip" data-date="' + d + '" onclick="this.classList.toggle(\'selected\')">' + formatDateNL(d) + '</button>';
+    planDates.filter(geldigeDatum).forEach(function(d){
+      html += '<button type="button" class="date-chip" data-date="' + d + '" onclick="this.classList.toggle(\'selected\')">' + esc(formatDateNL(d)) + '</button>';
     });
     container.innerHTML = html;
 
     var note = document.getElementById('respond-tijdstip-note');
-    if (note) note.textContent = 'Tijdstip: ' + (TIJDSTIP_LABELS[planTijdstip] || planTijdstip) + '.';
+    if (note) note.textContent = 'Tijdstip: ' + (TIJDSTIP_LABELS[planTijdstip] || 's avonds') + '.';
 
     if (hasAlreadyResponded()) markAlreadyResponded();
   }
@@ -961,9 +1062,8 @@
         if (status) status.textContent = 'Fout (' + res.status + '): ' + errText;
         return;
       }
-      if (status) status.textContent = 'Bedankt ' + naam + '! Je beschikbaarheid is opgeslagen.';
       try { localStorage.setItem('uitje_ingevuld_' + planCode, '1'); } catch (err) { /* no-op */ }
-      markAlreadyResponded();
+      markAlreadyResponded(naam);
       refreshResults();
     } catch (err){
       console.error('Kon reactie niet opslaan:', err);
@@ -986,161 +1086,148 @@
     var container = document.getElementById('result-chips');
     if (!container) return;
     var html = '';
-    planDates.forEach(function(d){
-      html += '<div class="result-chip lvl0" id="res-' + d + '">' + formatDateNL(d) + '<span class="count">0</span></div>';
+    planDates.filter(geldigeDatum).forEach(function(d){
+      html += '<div class="result-chip lvl0" id="res-' + d + '">' + esc(formatDateNL(d)) + '<span class="count">0</span></div>';
     });
     container.innerHTML = html;
 
     var note = document.getElementById('result-tijdstip-note');
-    if (note) note.textContent = 'Tijdstip: ' + (TIJDSTIP_LABELS[planTijdstip] || planTijdstip) + '.';
+    if (note) note.textContent = 'Tijdstip: ' + (TIJDSTIP_LABELS[planTijdstip] || 's avonds') + '.';
   }
 
   async function refreshResults(){
     var resultText = document.getElementById('result-text');
-    if (!SUPABASE_READY){
-      if (resultText) resultText.innerHTML = '<strong>Nog niet gekoppeld</strong> &#8212; vul de Supabase-gegevens in de code in om live resultaten te zien.';
-      return;
-    }
-    if (!planCode || planDates.length === 0){
-      if (resultText) resultText.textContent = 'Nog geen plan gevonden.';
-      return;
-    }
+    if (!SUPABASE_READY || !planCode || planDates.length === 0) return;
 
     try {
-      var res = await fetch(SUPABASE_URL + '/rest/v1/responses?plan_id=eq.' + encodeURIComponent(planCode) + '&select=naam,beschikbaarheid', {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
-      });
-      var data = await res.json();
+      var data = await rpc('get_responses', { p_plan_id: planCode });
       var total = data.length;
-
       var counts = {};
       data.forEach(function(r){
-        (r.beschikbaarheid || []).forEach(function(d){
-          counts[d] = (counts[d] || 0) + 1;
-        });
+        (r.beschikbaarheid || []).forEach(function(d){ counts[d] = (counts[d] || 0) + 1; });
       });
 
-      var bestDate = null, bestCount = -1;
-      planDates.forEach(function(d){
+      var geldige = planDates.filter(geldigeDatum);
+      var bestCount = 0;
+      geldige.forEach(function(d){ bestCount = Math.max(bestCount, counts[d] || 0); });
+      var besten = geldige.filter(function(d){ return bestCount > 0 && (counts[d] || 0) === bestCount; });
+
+      geldige.forEach(function(d){
         var count = counts[d] || 0;
         var chip = document.getElementById('res-' + d);
         if (chip){
-          chip.className = 'result-chip ' + levelClassFor(count, total);
-          chip.innerHTML = formatDateNL(d) + '<span class="count">' + count + '</span>';
-        }
-        if (count > bestCount){
-          bestCount = count;
-          bestDate = d;
+          chip.className = 'result-chip ' + levelClassFor(count, total) + (besten.indexOf(d) !== -1 ? ' best' : '');
+          chip.innerHTML = esc(formatDateNL(d)) + '<span class="count">' + count + '</span>';
         }
       });
 
-      var bestChip = bestDate ? document.getElementById('res-' + bestDate) : null;
-      if (bestChip) bestChip.classList.add('best');
+      if (lockedDate || !resultText) return;
 
-      if (resultText){
-        if (total === 0){
-          resultText.innerHTML = '<strong>Nog geen reacties</strong> &#8212; deel het linkje om beschikbaarheid te verzamelen.';
-        } else {
-          resultText.innerHTML = '<strong>Beste datum: ' + formatDateNL(bestDate) + '</strong> \u2014 ' + bestCount + ' van de ' + total + ' kunnen';
-          // Organisator kan de winnende datum vastzetten (niet zichtbaar voor genodigden).
-          var lockBox = document.getElementById('lock-box');
-          var lockBtn = document.getElementById('lock-btn');
-          if (lockBox && lockBtn && !getPlanCodeFromURL() && !lockedDate){
-            lockBtn.setAttribute('data-date', bestDate);
-            lockBtn.textContent = 'Zet vast: ' + formatDateNL(bestDate);
-            lockBox.style.display = 'flex';
-          }
-        }
+      if (total === 0){
+        resultText.innerHTML = '<strong>Nog geen reacties</strong> &#8212; deel het linkje om beschikbaarheid te verzamelen.';
+      } else if (besten.length > 1){
+        resultText.innerHTML = '<strong>Gelijkspel</strong> \u2014 ' + esc(besten.map(formatDateNL).join(' en ')) +
+          ' (' + bestCount + ' van de ' + total + ' kunnen)';
+      } else {
+        resultText.innerHTML = '<strong>Beste datum: ' + esc(formatDateNL(besten[0])) + '</strong> \u2014 ' + bestCount + ' van de ' + total + ' kunnen';
+      }
+
+      // Alleen de organisator kan vastzetten; bij gelijkspel kiest die zelf.
+      var mijn = vindMijnPlan(planCode);
+      var lockBox = document.getElementById('lock-box');
+      if (lockBox && mijn && mijn.token && besten.length){
+        lockBox.innerHTML = besten.map(function(d){
+          return '<button type="button" class="nav-btn" onclick="lockInDate(\'' + d + '\')">Zet vast: ' + esc(formatDateNL(d)) + '</button>';
+        }).join('');
+        lockBox.style.display = 'flex';
       }
     } catch (err){
       console.error('Kon resultaten niet ophalen:', err);
-      if (resultText) resultText.textContent = 'Kon resultaten niet ophalen.';
+      if (resultText && !lockedDate) resultText.textContent = 'Kon resultaten niet ophalen.';
     }
   }
 
   // ===== INIT =====
 
   async function init(){
-    var existingCode = getPlanCodeFromURL();
+    migreerOudPlan();
+    var code = getPlanCodeFromURL();
 
-    if (existingCode){
-      // Genodigde: dit IS het plan.
-      planCode = existingCode;
-      var info = await fetchPlanInfo(existingCode);
-
-      if (!info || !info.dates || info.dates.length === 0){
-        // Linkje klopt niet of het plan bestaat niet meer.
-        showBlock('setup-block', false);
-        showBlock('share-block', false);
-        showBlock('respond-block', false);
-        showBlock('result-block', false);
+    if (code){
+      planCode = code;
+      var info = await fetchPlanInfo(code);
+      if (!info || !Array.isArray(info.dates) || info.dates.filter(geldigeDatum).length === 0){
+        ['setup-block','share-block','respond-block','result-block'].forEach(function(id){ showBlock(id, false); });
         showBlock('notfound-block', true);
         return;
       }
 
-      planDates = info.dates;
+      planDates = info.dates.filter(geldigeDatum);
       planTijdstip = info.tijdstip || 'avond';
-      if (info.plan_items){
-        renderPlanPreview(info.plan_items);
-        checkWeatherForToday(info.plan_items, planDates);
-      }
+      planItems = info.plan_items || null;
+      lockedDate = geldigeDatum(info.locked_date) ? info.locked_date : null;
+
       showBlock('setup-block', false);
-      showBlock('share-block', false);
-      showBlock('respond-block', true);
-      renderDatePicker();
+      if (vindMijnPlan(code)) showShareBlock();
       renderResultChips();
       showBlock('result-block', true);
-      refreshResults();
-      if (SUPABASE_READY) setInterval(refreshResults, 10000);
-      return;
-    }
 
-    var stored = null;
-    try { stored = localStorage.getItem('uitje_eigen_plan_code'); } catch (err) { /* no-op */ }
-
-    if (stored){
-      // Organisator die terugkomt op zijn eigen plan.
-      var ownInfo = await fetchPlanInfo(stored);
-      if (ownInfo && ownInfo.dates && ownInfo.dates.length > 0){
-        planCode = stored;
-        planDates = ownInfo.dates;
-        planTijdstip = ownInfo.tijdstip || 'avond';
-        if (ownInfo.plan_items){
-          planItems = ownInfo.plan_items;
+      if (lockedDate){
+        toonVastgezet();
+      } else {
+        if (planItems){
           renderPlanPreview(planItems);
           checkWeatherForToday(planItems, planDates);
         }
-        showBlock('setup-block', false);
-        showShareBlock();
         showBlock('respond-block', true);
         renderDatePicker();
-        renderResultChips();
-        refreshResults();
-        if (SUPABASE_READY) setInterval(refreshResults, 10000);
-        return;
       }
-      // Opgeslagen plan bestaat niet meer: opruimen en gewoon opnieuw beginnen.
-      try { localStorage.removeItem('uitje_eigen_plan_code'); } catch (err) { /* no-op */ }
+      refreshResults();
+      if (SUPABASE_READY && !lockedDate) setInterval(refreshResults, 10000);
+      return;
     }
 
-    // Nieuw bezoek: toon het bevestigde plan (indien aanwezig) en het datumformulier.
+    // Geen linkje: nieuw plan maken, plus je eerdere plannen.
     planItems = loadConfirmedPlan();
     if (planItems){
       renderPlanPreview(planItems);
+      var tijdRij = document.getElementById('setup-tijdstip');
+      if (tijdRij && planItems.dagdeel){
+        tijdRij.value = planItems.dagdeel;
+        var rij = tijdRij.closest('.field-row');
+        if (rij) rij.style.display = 'none';
+        var uitleg = document.getElementById('tijdstip-uit-plan');
+        if (uitleg){
+          uitleg.textContent = 'Tijdstip: ' + (TIJDSTIP_LABELS[planItems.dagdeel] || '') + ', zoals in je plan.';
+          uitleg.style.display = 'block';
+        }
+      }
     } else {
       var noPlanNote = document.getElementById('no-plan-note');
       if (noPlanNote) noPlanNote.style.display = 'block';
     }
 
-    var today = new Date().toISOString().split('T')[0];
+    var vandaag = lokaleDatum();
     for (var d = 1; d <= 4; d++){
       var inp = document.getElementById('setup-date-' + d);
-      if (inp) inp.min = today;
+      if (inp) inp.min = vandaag;
     }
+    toonMijnPlannen();
     showBlock('setup-block', true);
-    showBlock('share-block', false);
-    showBlock('respond-block', false);
-    showBlock('result-block', false);
+    ['share-block','respond-block','result-block'].forEach(function(id){ showBlock(id, false); });
+  }
+
+  function toonMijnPlannen(){
+    var lijst = mijnPlannen();
+    var blok = document.getElementById('mijn-plannen-block');
+    var cont = document.getElementById('mijn-plannen');
+    if (!blok || !cont || !lijst.length) return;
+    cont.innerHTML = lijst.map(function(p){
+      return '<a class="mijn-plan" href="' + esc(buildShareLink(p.code)) + '">' +
+        '<strong>' + esc(p.titel || 'Plan') + '</strong>' +
+        (p.datum ? '<span>gemaakt ' + esc(korteDatum(p.datum)) + '</span>' : '') + '</a>';
+    }).join('');
+    blok.style.display = 'block';
   }
 
   document.addEventListener('DOMContentLoaded', init);

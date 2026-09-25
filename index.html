@@ -14,11 +14,12 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Uitje — nooit meer 'wat zullen we doen'">
 <meta property="og:description" content="Uitje plant in een paar tikken een compleet uitje — voor je date of de hele vriendengroep.">
-<meta property="og:image" content="./og-image.png">
+<meta property="og:image" content="https://uitjemaker.nl/og-image.png">
+<meta property="og:url" content="https://uitjemaker.nl/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Uitje — nooit meer 'wat zullen we doen'">
 <meta name="twitter:description" content="Uitje plant in een paar tikken een compleet uitje — voor je date of de hele vriendengroep.">
-<meta name="twitter:image" content="./og-image.png">
+<meta name="twitter:image" content="https://uitjemaker.nl/og-image.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -290,20 +291,19 @@
 <header class="hero">
   <div class="wrap">
     <div>
-      <span class="eyebrow">Nog in de maak</span>
+      <span class="eyebrow">Gratis &#183; geen account</span>
       <h1>Wat gaan we vandaag doen?</h1>
       <p class="lede">Vul in waar je zin in hebt &#8212; Uitje zet er een compleet plan tegenover. Voor je date, of de hele vriendengroep.</p>
       <div class="share-box">
         <a class="nav-btn" href="#plannen">Maak je Uitje</a>
       </div>
-      <p class="hero-cta-hint" style="margin-top:16px;">Gratis, geen account nodig.</p>
     </div>
 
     <div class="preview-card" aria-label="Voorbeeld van een gegenereerd plan">
       <p class="pc-label">Voorbeeldplan &#183; Utrecht</p>
       <div class="pc-row">
         <div class="pc-time">19:00</div>
-        <div class="pc-text"><strong>Borrel bij een bruin café</strong><span>Binnenstad &#183; nu open</span></div>
+        <div class="pc-text"><strong>Borrel bij een bruin café</strong><span>Binnenstad</span></div>
       </div>
       <div class="pc-row">
         <div class="pc-time">20:15</div>
@@ -494,7 +494,7 @@
       <div class="step">
         <span class="step-num">2</span>
         <h4>Uitje stelt een plan voor</h4>
-        <p>Een compleet, uitvoerbaar plan met echte plekken &#8212; geen losse ideetjes.</p>
+        <p>Een plan dat als geheel klopt. Met &eacute;&eacute;n tik zoek je er echte plekken bij.</p>
       </div>
       <div class="step">
         <span class="step-num">3</span>
@@ -515,7 +515,7 @@
 
 <footer>
   <div class="wrap">
-    <span>Uitje is gratis en werkt zonder account.</span>
+    <span>Uitje</span>
     <span><a href="./privacy.html" style="color:inherit;text-decoration:underline;">Privacy</a> &middot; &copy; 2026 Uitje</span>
   </div>
 </footer>
@@ -608,11 +608,10 @@
   };
 
   var vervoerMap = {
-    lopend: { label: 'lopen',   factor: 1 },
-    fiets:  { label: 'fietsen', factor: 0.4 },
-    auto:   { label: 'rijden',  factor: 0.25 }
+    lopend: { label: 'lopen' },
+    fiets:  { label: 'fietsen' },
+    auto:   { label: 'rijden' }
   };
-  var transferBasePattern = [12, 9, 14, 7]; // basistijd lopend, cyclisch per tussenstap
 
   var openingMap = {
     gezellig: {
@@ -693,6 +692,274 @@
       if (filtered.length >= 3) return filtered;
     }
     return lijst;
+  }
+
+  var planTemplates = {
+    gezellig: {
+      budget: {
+        avond: [
+          { idee: "Klassieke kroegavond", stappen: ["Biertje in een bruin café", "Frietje of broodje bij een eetcafé", "Poolen of darten in de kroeg", "Stroopwafel of ijsje onderweg", "Laatste rondje in het café"] },
+          { idee: "Pizza en spelletjes", stappen: ["Drankje op een terras", "Pizza delen bij een pizzeria", "Bordspellencafé bezoeken", "Churros bij een kraam", "Rustig terugwandelen"] },
+          { idee: "Picknick in het park", stappen: ["Boodschappen doen voor een picknick", "Picknick in het park", "Frisbee of een spelletje in het gras", "IJsje halen bij de ijssalon", "Nog even napraten op een bankje"] }
+        ],
+        ochtend: [
+          { idee: "Rustig de dag beginnen", stappen: ["Koffie halen bij een koffiezaak", "Ontbijten bij een lunchroom", "Rondje over de markt", "Stroopwafel vers van de kraam", "Wandeling door het park"] },
+          { idee: "Marktochtend", stappen: ["Rondje over de markt", "Verse broodjes ontbijten van de bakker", "Kringloopwinkel afstruinen", "Koffie met appeltaart", "Wandeling door de binnenstad"] }
+        ],
+        middag: [
+          { idee: "Terras en slenteren", stappen: ["Terrasje pakken in de zon", "Tosti en soep bij een lunchroom", "Etalages kijken in de binnenstad", "IJsje halen bij de ijssalon", "Biertje op een terras"] },
+          { idee: "Middag in het park", stappen: ["Wandeling door het park", "Picknick met broodjes", "Frisbee of een spelletje in het gras", "IJsje bij de ijssalon", "Drankje in een buurtcafé"] }
+        ],
+      },
+      middel: {
+        avond: [
+          { idee: "Borrel, tapas en muziek", stappen: ["Borrel bij een gezellig café", "Tapas delen bij een tapasbar", "Livemuziek in een café", "Churros met chocolade", "Laatste drankje aan de bar"] },
+          { idee: "Burger en bowlen", stappen: ["Speciaalbiertje bij een brouwerij", "Burger bij een goede burgerzaak", "Rondje bowlen", "Milkshake bij een milkshakebar", "Nog een drankje in een kroeg"] },
+          { idee: "Italiaans en karaoke", stappen: ["Aperitief op een terras", "Pasta bij een Italiaans restaurant", "Karaoke zingen", "Tiramisu bij een dessertbar", "Laatste rondje aan de bar"] }
+        ],
+        ochtend: [
+          { idee: "Uitgebreide brunch", stappen: ["Specialty koffie bij een koffiebar", "Brunch met eieren en verse sapjes", "Vintage winkels afstruinen", "Gebakje bij een banketbakker", "Wandeling langs het water"] },
+          { idee: "Museumochtend", stappen: ["Koffie en croissant bij een bakkerij", "Uitgebreid ontbijten", "Museum bezoeken", "Taartje bij een patisserie", "Rondje door de binnenstad"] }
+        ],
+        middag: [
+          { idee: "Middag op stap", stappen: ["Rondvaart door de stad", "Borrelplank delen op een terras", "Escape room doen", "IJsje bij de ijssalon", "Speciaalbiertje bij een brouwerij"] },
+          { idee: "Cultuur en terras", stappen: ["Museum bezoeken", "Late lunch bij een goed café", "Boekwinkel en vintage winkelen", "Wafel met toppings", "Wijntje op een terras"] }
+        ],
+      },
+      luxe: {
+        avond: [
+          { idee: "Chique avond uit", stappen: ["Cocktails bij een chique bar", "Diner bij een gerenommeerd restaurant", "Jazzclub met livemuziek", "Dessert bij een patisserie", "Laatste drankje in een lounge"] },
+          { idee: "Rooftop en theater", stappen: ["Aperitief op een rooftop", "Chef's tasting menu met wijnarrangement", "Voorstelling in het theater", "Petit fours bij een chique zaak", "Nachtcap in een hotelbar"] },
+          { idee: "Proeverij-avond", stappen: ["Wijnproeverij bij een wijnbar", "Diner met wijnarrangement", "Cocktailworkshop bij een cocktailbar", "Chocolade-tasting", "Whisky als afsluiter"] }
+        ],
+        ochtend: [
+          { idee: "Brunch in stijl", stappen: ["Koffie in een grand café", "Uitgebreide brunch met bubbels", "Kunstgalerie bezoeken", "Patisserie uitzoeken", "Wandeling langs het water"] },
+          { idee: "Luxe ochtend", stappen: ["Privé-rondleiding in een museum", "Uitgebreide brunch in een hotel", "Luxe winkelen in de binnenstad", "Macarons bij een patisserie", "Koffie in een grand café"] }
+        ],
+        middag: [
+          { idee: "High tea en cultuur", stappen: ["Kunstgalerie bezoeken", "High tea in een grand hotel", "Rondvaart door de stad", "Chocolade-tasting", "Champagne op een terras"] },
+          { idee: "Proeven en genieten", stappen: ["Luxe winkelen in de binnenstad", "Lunch bij een gerenommeerd restaurant", "Wijnproeverij bij een wijnbar", "Patisserie uitzoeken", "Cocktail op een rooftop"] }
+        ],
+      },
+    },
+    romantisch: {
+      budget: {
+        avond: [
+          { idee: "Picknick bij het water", stappen: ["Wandeling langs het water", "Picknick met zelfgemaakte broodjes", "Samen een uitzichtpunt opzoeken", "IJsje delen", "Handje vasthouden op een bankje"] },
+          { idee: "Pizza en de verlichte stad", stappen: ["Wijntje bij een betaalbaar tapasbarretje", "Pizza delen bij een klein tentje", "Wandeling langs de verlichte gracht", "Warme chocolademelk halen", "Rustig samen naar huis"] },
+          { idee: "Thuis-date", stappen: ["Samen boodschappen doen", "Zelf koken en samen eten", "Film kijken thuis", "Popcorn maken", "Onder een deken op het balkon"] }
+        ],
+        ochtend: [
+          { idee: "Ochtendwandeling", stappen: ["Koffie halen en gaan wandelen", "Ontbijt bij een lief tentje", "Bloemenmarkt bezoeken", "Stroopwafel vers van de kraam", "Bankje zoeken met uitzicht"] },
+          { idee: "Picknickontbijt", stappen: ["Wandeling in de vroege zon", "Picknickontbijt in het park", "Samen een fotowandeling maken", "Warme chocolademelk halen", "Rustig terugwandelen"] }
+        ],
+        middag: [
+          { idee: "Water en picknick", stappen: ["Wandeling langs het water", "Picknick in het park", "Samen een fotowandeling maken", "IJsje delen", "Drankje op een zonnig terras"] },
+          { idee: "Gratis cultuurmiddag", stappen: ["Gratis expositie bezoeken", "Falafel delen", "Rondje door een oude buurt", "Koffie met gebak", "Bankje zoeken met uitzicht"] }
+        ],
+      },
+      middel: {
+        avond: [
+          { idee: "Klassieke date", stappen: ["Wijntje op een rustig terras", "Diner voor twee bij kaarslicht", "Wandeling langs het water", "Dessert delen bij een dessertbar", "Laatste drankje op een rooftop"] },
+          { idee: "Italiaanse avond", stappen: ["Aperitief met uitzicht", "Italiaans met een fles wijn", "Filmhuis bezoeken", "Tiramisu delen bij een dessertbar", "Rondje langs de verlichte gracht"] },
+          { idee: "Varen en tapas", stappen: ["Bootje varen door de stad", "Tapas delen bij een Spaans restaurant", "Livemuziek in een intiem café", "IJsje met twee lepeltjes", "Cocktail in een intieme bar"] }
+        ],
+        ochtend: [
+          { idee: "Brunch met bubbels", stappen: ["Koffie bij een romantisch tentje", "Brunch met bubbels", "Botanische tuin bezoeken", "Macarons delen", "Wandeling door een historisch centrum"] },
+          { idee: "Bloemen en kunst", stappen: ["Bloemenmarkt bezoeken", "Uitgebreid ontbijten met z'n tweeën", "Samen naar een expositie", "Gebakje bij een patisserie", "Bootje varen door de stad"] }
+        ],
+        middag: [
+          { idee: "High tea en varen", stappen: ["Botanische tuin bezoeken", "High tea samen", "Rondvaart door de stad", "Bonbons uitzoeken bij een chocolatier", "Wijntje op een zonnig terras"] },
+          { idee: "Middag aan het water", stappen: ["Samen naar een expositie", "Lunch aan het water", "Bootje huren voor een uurtje", "IJsje met twee lepeltjes", "Aperitief met uitzicht"] }
+        ],
+      },
+      luxe: {
+        avond: [
+          { idee: "Sterrendiner", stappen: ["Champagne bij een champagnebar", "Diner in een sterrenrestaurant", "Wandeling langs het water", "Chocolade-degustatie", "Nachtcap op een rooftop"] },
+          { idee: "Chef's table en jazz", stappen: ["Cocktails met uitzicht", "Chef's table ervaring", "Jazzclub met livemuziek", "Dessert bij een patisserie", "Laatste glas in een hotelbar"] },
+          { idee: "Varen en theater", stappen: ["Privé-rondvaart door de stad", "Diner met wijnarrangement voor twee", "Voorstelling in het theater", "Champagne met aardbeien", "Nachtwandeling langs de verlichte stad"] }
+        ],
+        ochtend: [
+          { idee: "Champagne-ontbijt", stappen: ["Koffie in een grand café", "Champagne-ontbijt", "Privé-galeriebezoek", "Patisserie voor twee", "Wandeling langs het water"] },
+          { idee: "Spa en brunch", stappen: ["Spa-ochtend samen", "Hotelbrunch met uitzicht", "Botanische tuin bezoeken", "Bonbons bij een chocolatier", "Koffie op een terras met uitzicht"] }
+        ],
+        middag: [
+          { idee: "High tea in stijl", stappen: ["Kunstgalerie bezoeken", "High tea in een grand hotel", "Privé-rondvaart door de stad", "Chocolade-degustatie", "Champagne op een terras"] },
+          { idee: "Spa en oesters", stappen: ["Spa-middag samen", "Oesters en champagne", "Luxe winkelen in de binnenstad", "Macarons bij een patisserie", "Cocktail op een rooftop"] }
+        ],
+      },
+    },
+    chill: {
+      budget: {
+        avond: [
+          { idee: "Rustige thuisavond", stappen: ["Boodschappen doen voor het avondeten", "Zelf koken en samen eten", "Serie kijken samen", "Popcorn maken", "Nog een aflevering kijken"] },
+          { idee: "Buurtcafé en wandeling", stappen: ["Biertje in een buurtcafé", "Snack bij de snackbar", "Rustig een stukje wandelen", "IJsje bij de ijssalon", "Rustig naar huis"] },
+          { idee: "Afhalen en film", stappen: ["Drankje op het terras om de hoek", "Pizza afhalen bij een pizzeria", "Film kijken thuis", "Koekje bij de thee", "Muziek opzetten en niks doen"] }
+        ],
+        ochtend: [
+          { idee: "Rustig wakker worden", stappen: ["Koffie halen en gaan zitten", "Rustig ontbijten bij een lunchroom", "Boek lezen in het park", "Warme chocolademelk halen", "Rustig slenteren door de buurt"] },
+          { idee: "Luie ochtend thuis", stappen: ["Langzaam wakker worden met koffie", "Tosti's bakken", "Krantje lezen", "Koekje bij de koffie", "Wandeling om het water"] }
+        ],
+        middag: [
+          { idee: "Boekwinkel en terras", stappen: ["Terrasje pakken om de hoek", "Soep en brood bij een lunchroom", "Boekwinkel snuffelen", "IJsje bij de ijssalon", "Rustig in het park ploffen"] },
+          { idee: "Middag in het gras", stappen: ["Wandeling door het park", "Broodjes meenemen naar het park", "Boek lezen naast elkaar", "IJsje bij de ijssalon", "Muziek luisteren in het gras"] }
+        ],
+      },
+      middel: {
+        avond: [
+          { idee: "Loungen en film", stappen: ["Rustige borrel in een loungecafé", "Comfort food bij een goed café", "Filmhuis bezoeken", "Cheesecake bij een dessertbar", "Nog een drankje zonder haast"] },
+          { idee: "Curry en spelletjes", stappen: ["Wijntje op een rustig terras", "Curry eten bij een ontspannen restaurant", "Spelletjescafé bezoeken", "Milkshake bij een milkshakebar", "Rustig napraten"] },
+          { idee: "Sauna en bistro", stappen: ["Sauna-bezoek", "Rustig diner bij een bistro", "Wandeling door het park", "Warme appeltaart bij een café", "Rustig terugwandelen"] }
+        ],
+        ochtend: [
+          { idee: "Brunch zonder haast", stappen: ["Specialty koffie bij een koffiebar", "Brunch zonder haast", "Boekwinkel met koffie", "Gebakje bij een banketbakker", "Rustige wandeling door het park"] },
+          { idee: "Thee en museum", stappen: ["Kop thee bij een theehuis", "Pannenkoeken eten", "Museum op je gemak", "Koffie met appeltaart", "Rondje langs leuke winkels"] }
+        ],
+        middag: [
+          { idee: "Sauna en film", stappen: ["Sauna-bezoek", "Late lunch bij een rustig café", "Filmhuis bezoeken", "IJsje bij de ijssalon", "Wijntje op een rustig terras"] },
+          { idee: "Rustige cultuurmiddag", stappen: ["Rustig door een boekhandel", "High tea bij een theehuis", "Museum op je gemak", "Taartje bij een patisserie", "Zonnen op een terras"] }
+        ],
+      },
+      luxe: {
+        avond: [
+          { idee: "Loungen en sauna", stappen: ["Loungen bij een rustige cocktailbar", "Relaxed diner bij een goed restaurant", "Privé-sauna", "Dessertwijn bij een wijnbar", "Cognac bij het haardvuur"] },
+          { idee: "Wijn en jazz", stappen: ["Wijnproeverij zonder haast", "Slow food restaurant", "Jazzclub op de achtergrond", "Kaasplateau met port", "Rustig naar huis"] },
+          { idee: "Spa en haardvuur", stappen: ["Spa-moment vooraf", "Diner bij het haardvuur", "Loungen op een rooftop", "Tiramisu bij een dessertbar", "Rustig naar huis"] }
+        ],
+        ochtend: [
+          { idee: "Spa-ochtend", stappen: ["Spa-ochtend", "Hotelontbijt", "Rustige galerie bezoeken", "Patisserie uitzoeken", "Koffie in een grand café"] },
+          { idee: "Brunch in rust", stappen: ["Koffie in een grand café", "Uitgebreide brunch", "Privé-museumbezoek", "Chocolade proeven bij een chocolatier", "Wandeling met uitzicht"] }
+        ],
+        middag: [
+          { idee: "Sauna en high tea", stappen: ["Privé-sauna", "High tea in een grand hotel", "Rustige galerie bezoeken", "Chocolade proeven bij een chocolatier", "Champagne op een terras"] },
+          { idee: "Massage en rooftop", stappen: ["Massage inplannen", "Lunch met uitzicht", "Rustige rondvaart", "Soufflé bij een patisserie", "Loungen op een rooftop"] }
+        ],
+      },
+    },
+    actief: {
+      budget: {
+        avond: [
+          { idee: "Sporten in het park", stappen: ["Hardlooprondje samen", "Wrap bij een gezonde tent", "Voetballen op een trapveldje", "Smoothie bij een smoothiebar", "Stretchen in het park"] },
+          { idee: "Pleintje en frisbee", stappen: ["Basketballen op een pleintje", "Snelle hap bij een snackbar", "Frisbee in het park", "Smoothie bij een smoothiebar", "Rustig uitlopen"] },
+          { idee: "Fietsen en skaten", stappen: ["Fietstocht door de stad", "Broodje gezond bij een broodjeszaak", "Skaten op een pleintje", "IJsje bij de ijssalon", "Rustig terugfietsen"] }
+        ],
+        ochtend: [
+          { idee: "Ochtendsport", stappen: ["Ochtendrondje hardlopen", "Havermout maken als ontbijt", "Bootcamp in het park", "Smoothie zelf maken", "Rondje zwemmen in het zwembad"] },
+          { idee: "Fietsochtend", stappen: ["Fietstocht in de ochtend", "Ontbijt bij een lunchroom", "Frisbee in het park", "Smoothie bij een smoothiebar", "Rustig terugfietsen"] }
+        ],
+        middag: [
+          { idee: "Fietsen en voetbal", stappen: ["Fietstocht door de stad", "Wrap bij een gezonde tent", "Voetballen op een trapveldje", "IJsje na het sporten", "Rustig uitlopen"] },
+          { idee: "Zwemmen en skaten", stappen: ["Rondje zwemmen in het zwembad", "Broodje gezond bij een broodjeszaak", "Skaten op een pleintje", "Smoothie bij een smoothiebar", "Stretchen in het park"] }
+        ],
+      },
+      middel: {
+        avond: [
+          { idee: "Padel en bowlen", stappen: ["Padel spelen", "Poké bowl bij een gezonde tent", "Rondje bowlen", "Frozen yoghurt", "Speciaalbiertje bij een brouwerij"] },
+          { idee: "Klimmen en poolen", stappen: ["Boulderen in een klimhal", "Burger bij een goede burgerzaak", "Darten of poolen", "Milkshake bij een milkshakebar", "Drankje in een sportbar"] },
+          { idee: "Lasergamen en karten", stappen: ["Lasergamen", "Grill-restaurant", "Kartbaan bezoeken", "Smoothie bij een smoothiebar", "Rustig uitlopen"] }
+        ],
+        ochtend: [
+          { idee: "Zwemmen en klimmen", stappen: ["Zwemmen in een zwembad", "Eiwitrijk ontbijt", "Klimmen in een klimhal", "Smoothiebowl bij een smoothiebar", "Wandeling door het park"] },
+          { idee: "Spinning en suppen", stappen: ["Spinningles", "Brunch na het sporten", "Roeien of suppen", "Açaí bowl bij een smoothiebar", "Rustig uitlopen"] }
+        ],
+        middag: [
+          { idee: "Springen en minigolf", stappen: ["Trampolinepark", "Poké bowl bij een gezonde tent", "Minigolf", "Frozen yoghurt", "Speciaalbiertje bij een brouwerij"] },
+          { idee: "Padel en klimmen", stappen: ["Padel spelen", "Late lunch bij een gezonde tent", "Klimmen in een klimhal", "Smoothie bij een smoothiebar", "Zwemmen in een zwembad"] }
+        ],
+      },
+      luxe: {
+        avond: [
+          { idee: "Padel en sauna", stappen: ["Padel bij een exclusieve club", "Chef's healthy menu", "Squash bij een privéclub", "Sorbet van vers fruit", "Sauna na het sporten"] },
+          { idee: "Tennis en racen", stappen: ["Tennis bij een chique club", "Diner bij een clubhuis", "Racecircuit rijden", "Superfood dessert", "Spa-sessie als afsluiter"] },
+          { idee: "Training en grill", stappen: ["Personal training-sessie", "Grill met kwaliteitsvlees", "Privé-sauna", "Kokosijs bij een ijssalon", "Cocktail in een sportbar"] }
+        ],
+        ochtend: [
+          { idee: "Golf en zeilen", stappen: ["Golfles nemen", "Brunch bij een clubhuis", "Zeilen", "Vers geperst sap", "Massage na het sporten"] },
+          { idee: "Yoga en tennis", stappen: ["Privé-yogales", "Superfood-brunch", "Tennis bij een chique club", "Açaí met superfoods", "Wellness"] }
+        ],
+        middag: [
+          { idee: "Zeilen en golf", stappen: ["Zeilen", "Lunch bij een clubhuis", "Golfles nemen", "Sorbet van vers fruit", "Spa-sessie"] },
+          { idee: "Water en wellness", stappen: ["Wakeboarden", "Gezond fine dining", "Duiken", "Smoothiebowl bij een smoothiebar", "Sauna en stoombad"] }
+        ],
+      },
+    },
+    avontuurlijk: {
+      budget: {
+        avond: [
+          { idee: "Speurtocht en streetfood", stappen: ["Speurtocht door de stad", "Streetfood proeven op een foodmarkt", "Onbekende buurt verkennen", "IJsje met de raarste smaak", "Laatste drankje in een studentenbar"] },
+          { idee: "Street art bij avond", stappen: ["Street art zoeken", "Indonesisch eten bij een klein tentje", "Nachtelijke fietstocht", "Zoetigheid uit een andere cultuur", "Rustig terugfietsen"] },
+          { idee: "Onbekende keuken", stappen: ["Happy hour bij een studentenbar", "Onbekende keuken proberen", "Speurtocht door de stad", "Churros bij een kraam", "Laatste plek waar nog licht brandt"] }
+        ],
+        ochtend: [
+          { idee: "Willekeurige bushalte", stappen: ["Met de bus naar een willekeurige halte", "Ontbijt bij een onbekende bakker", "Onbekende buurt verkennen", "Zoetigheid uit een andere cultuur", "Nieuwe route terugwandelen"] },
+          { idee: "Rommelmarktochtend", stappen: ["Rommelmarkt afstruinen", "Streetfood-ontbijt op de markt", "Street art zoeken", "Vreemd fruit van de markt", "Naar het hoogste gratis punt"] }
+        ],
+        middag: [
+          { idee: "Urban exploring", stappen: ["Urban exploring", "Streetfood op een foodmarkt", "Speurtocht door de stad", "Bubble tea proberen", "Uitkijkpunt opzoeken"] },
+          { idee: "Rommelmarkt en attractie", stappen: ["Rommelmarkt afstruinen", "Onbekende keuken proberen", "Gratis attractie opzoeken", "Mochi-ijs proberen", "Happy hour bij een studentenbar"] }
+        ],
+      },
+      middel: {
+        avond: [
+          { idee: "Escape room en speakeasy", stappen: ["Escape room doen", "Fusion-keuken uitproberen", "Speakeasy-bar zoeken", "Dessert uit een andere cultuur", "Nachtclub proberen"] },
+          { idee: "Lasergamen en impro", stappen: ["Lasergamen", "Foodhal bezoeken", "Improvisatietheater", "Bubble tea proberen", "Livemuziek in een café"] },
+          { idee: "Klimmen en VR", stappen: ["Boulderen in een klimhal", "Dim sum proberen", "VR-ervaring proberen", "Mochi-ijs halen", "Cocktail in een verstopte bar"] }
+        ],
+        ochtend: [
+          { idee: "Klimmen en verrassen", stappen: ["Klimhal als opwarmer", "Brunch bij een onbekende keuken", "Kaartje kopen voor iets onbekends", "Bubble tea proberen", "Speurtocht door de stad"] },
+          { idee: "Boot en escape room", stappen: ["Vroege boottocht", "Dim sum als ontbijt", "Escape room doen", "Onbekend gebakje proberen bij een bakkerij", "Onbekende buurt verkennen"] }
+        ],
+        middag: [
+          { idee: "Escape room en karten", stappen: ["Escape room doen", "Foodhal bezoeken", "Kartbaan bezoeken", "Bubble tea proberen", "Speciaalbier bij een brouwerij"] },
+          { idee: "Springen en VR", stappen: ["Trampolinepark", "Streetfood op een foodmarkt", "VR-ervaring proberen", "Mochi-ijs halen", "Rooftopbar opzoeken"] }
+        ],
+      },
+      luxe: {
+        avond: [
+          { idee: "Helikopter en chef's table", stappen: ["Helikoptervlucht boven de stad", "Verrassingsmenu bij een chef's table", "Exclusieve speakeasy", "Chef's dessertverrassing", "VIP-toegang tot een club"] },
+          { idee: "Racen en diner in het donker", stappen: ["Racecircuit rijden", "Diner in het donker", "Casino bezoeken", "Bijzonder dessert bij een patisserie", "Nachtclub met gastenlijst"] },
+          { idee: "Privéboot en moleculair", stappen: ["Privé-boot afhuren", "Moleculaire keuken proberen", "Cocktailworkshop bij een cocktailbar", "Truffel-ijs", "Geheime locatie als afsluiter"] }
+        ],
+        ochtend: [
+          { idee: "Ballonvaart", stappen: ["Ballonvaart", "Chef's brunch", "Privé-rondleiding op een bijzondere plek", "Patisserie op maat", "Koffie in een grand café"] },
+          { idee: "Duiken en zeilen", stappen: ["Duiken", "Chef's brunch", "Wakeboarden", "Açaí met superfoods", "Zeilen"] }
+        ],
+        middag: [
+          { idee: "Racen en fine dining", stappen: ["Racecircuit rijden", "Fine dining met een twist", "Privé-rondleiding op een bijzondere plek", "Chef's dessertverrassing", "Champagne op een rooftop"] },
+          { idee: "Helikopter en blind tasting", stappen: ["Helikoptervlucht boven de stad", "Blind tasting menu", "Wakeboarden", "Bijzonder dessert bij een patisserie", "Cocktail op een rooftop"] }
+        ],
+      },
+    },
+  };
+
+  // Welke stappen blijven over bij minder stops? De kern van een plan gaat altijd voor.
+  // Index: 0 start, 1 eten, 2 activiteit, 3 toetje, 4 afsluiter.
+  var STAP_PRIORITEIT = {
+    gezellig:     [1, 2, 0, 3, 4],   // kern = samen eten
+    romantisch:   [1, 2, 0, 3, 4],
+    chill:        [1, 2, 0, 3, 4],
+    actief:       [0, 1, 2, 3, 4],   // kern = de sportactiviteit
+    avontuurlijk: [0, 1, 2, 3, 4]    // kern = het avontuur zelf
+  };
+  var ROL_LABELS = ['Start', 'Eten', 'Activiteit', 'Iets zoets', 'Afsluiter'];
+
+  function rollenVoorAantal(sfeer, aantal){
+    var prio = STAP_PRIORITEIT[sfeer] || STAP_PRIORITEIT.gezellig;
+    return prio.slice(0, Math.max(1, Math.min(5, aantal))).sort(function(a, b){ return a - b; });
+  }
+
+  var vorigePlanIdee = null;
+  var huidigPlanIdee = null;
+  function kiesTemplate(sfeer, tier, dagdeel){
+    var s = planTemplates[sfeer] || planTemplates.gezellig;
+    var t = s[tier] || s.middel;
+    var lijst = t[dagdeel] || t.avond;
+    // Bij opnieuw genereren niet hetzelfde plan als net.
+    var opties = lijst.filter(function(p){ return p.idee !== vorigePlanIdee; });
+    if (!opties.length) opties = lijst;
+    var gekozen = randomItem(opties);
+    vorigePlanIdee = gekozen.idee;
+    return gekozen;
   }
 
   var sfeerMap = {
@@ -816,20 +1083,29 @@
     var titels = sfeerTiers[tier] || sfeerTiers.middel;
     var tijden = genTimes(momentStart[moment] || momentStart.avond, aantal);
 
-    currentTheme = (Math.random() < 0.3) ? randomItem(weirdThemes) : null;
+    // Verrassingsthema's zijn avondconcepten en niet voor het laagste budget.
+    var themaMag = (moment === 'avond' && tier !== 'budget');
+    currentTheme = (themaMag && Math.random() < 0.2) ? randomItem(weirdThemes) : null;
+
+    var rollen = rollenVoorAantal(sfeer, aantal);
+    var plan = currentTheme ? null : kiesTemplate(sfeer, tier, moment);
 
     var summaryText = 'Voor ' + personenLabel + ' in ' + stad;
     if (currentTheme) summaryText += ' \u2014 verrassingsthema: \u201c' + currentTheme.naam + '\u201d';
+    else if (plan) summaryText += ' \u2014 ' + plan.idee;
+    huidigPlanIdee = currentTheme ? currentTheme.naam : (plan ? plan.idee : null);
     document.getElementById('plan-summary').textContent = summaryText;
 
     renderPlanRows(aantal);
 
     for (var i = 1; i <= aantal; i++){
       var titleLink = document.getElementById('plan-title-' + i);
+      var rol = rollen[i - 1];
+      titleLink.setAttribute('data-stap', STAP_NAMEN[rol]);
       if (currentTheme){
-        titleLink.textContent = currentTheme.steps[(i - 1) % currentTheme.steps.length];
+        titleLink.textContent = currentTheme.steps[rol % currentTheme.steps.length];
       } else {
-        titleLink.textContent = randomItem(suggestiesVoorStap(i - 1, sfeer, tier, moment));
+        titleLink.textContent = plan.stappen[rol];
       }
       titleLink.href = '#';
       titleLink.removeAttribute('data-adres');
@@ -844,14 +1120,10 @@
         subEl.textContent = 'Thuis \u2014 geen locatie nodig';
       } else if (onderwegRegex.test(titelTekst)){
         subEl.textContent = 'Onderweg \u2014 geen vaste plek';
-      } else if (i === 1){
-        subEl.textContent = stad + ' \u2014 vlakbij, geen wachtrij';
-      } else if (i === 2){
-        subEl.textContent = 'Binnen ' + budgetLabel + ', ' + stad;
-      } else if (i === aantal){
-        subEl.textContent = 'Rustig afsluiten, geen reservering nodig';
+      } else if (rol === 1){
+        subEl.textContent = ROL_LABELS[rol] + ' \u00b7 ' + budgetLabel;
       } else {
-        subEl.textContent = stad;
+        subEl.textContent = ROL_LABELS[rol] + ' \u00b7 ' + stad;
       }
     }
 
@@ -904,6 +1176,7 @@
       vervoer: vervoerSel ? vervoerSel.value : 'lopend',
       budget: budgetSel ? budgetSel.options[budgetSel.selectedIndex].text : '',
       thema: currentTheme ? currentTheme.naam : null,
+      idee: huidigPlanIdee,
       items: items
     };
   }
@@ -917,17 +1190,22 @@
 
   function buildVariant(sfeer, stad, tier, budgetLabel, aantal, startTijd, dagdeel){
     var tijden = genTimes(startTijd, aantal);
+    var rollen = rollenVoorAantal(sfeer, aantal);
+    var s = planTemplates[sfeer] || planTemplates.gezellig;
+    var t = s[tier] || s.middel;
+    var plan = randomItem(t[dagdeel] || t.avond);
     var items = [];
     for (var i = 0; i < aantal; i++){
+      var rol = rollen[i];
       items.push({
         tijd: tijden[i],
-        titel: randomItem(suggestiesVoorStap(i, sfeer, tier, dagdeel)),
-        sub: (i === 1 ? 'Binnen ' + budgetLabel : stad),
+        titel: plan.stappen[rol],
+        sub: ROL_LABELS[rol] + (rol === 1 ? ' \u00b7 ' + budgetLabel : ''),
         adres: null,
         link: null
       });
     }
-    return { label: SFEER_LABELS[sfeer] || sfeer, sfeer: sfeer, items: items };
+    return { label: (SFEER_LABELS[sfeer] || sfeer) + ': ' + plan.idee, sfeer: sfeer, items: items };
   }
 
   function generateVariants(){
@@ -1103,7 +1381,11 @@
 
     var gebruikt = {};
     for (var i = 1; i <= aantal; i++){
-      var stapNaam = STAP_NAMEN[(i - 1) % STAP_NAMEN.length];
+      var rijEl = document.getElementById('plan-title-' + i);
+      var stapNaam = rijEl ? rijEl.getAttribute('data-stap') : null;
+      if (!stapNaam) continue;
+      // Een thuis- of onderweg-stap hoort bij de opzet van het plan; daar geen restaurant overheen zetten.
+      if (geenLocatie(rijEl.textContent)) continue;
       var kandidaten = locaties.filter(function(l){
         return pastBij(l, stapNaam, sfeer, tier, dagdeel) && !gebruikt[l.naam];
       });
@@ -1211,7 +1493,7 @@
     if (el.getAttribute('data-lat')) return;
     var zoek = (el.getAttribute('data-naam') || el.textContent) + ' ' + (el.getAttribute('data-adres') || '') + ' ' + stad;
     try {
-      var place = await searchPlace(zoek);
+      var place = await searchPlace(zoek, stad);
       zetCoordinaten(el, place);
     } catch (err){
       console.error('Kon aanrader niet op de kaart zetten:', err);
@@ -1257,7 +1539,15 @@
   var zoekCache = {};
   var QUOTUM_OP = false;
 
-  async function searchPlace(query){
+  // Middelpunten van de steden in de lijst, om Google rond de juiste stad te laten zoeken.
+  var STAD_MIDDEN = {
+    'Amsterdam': [52.3676, 4.9041], 'Rotterdam': [51.9244, 4.4777], 'Den Haag': [52.0705, 4.3007],
+    'Utrecht': [52.0907, 5.1214], 'Eindhoven': [51.4416, 5.4697], 'Groningen': [53.2194, 6.5665],
+    'Tilburg': [51.5555, 5.0913], 'Almere': [52.3508, 5.2647], 'Breda': [51.5719, 4.7683],
+    'Nijmegen': [51.8425, 5.8528], 'Haarlem': [52.3874, 4.6462], 'Arnhem': [51.9851, 5.8987]
+  };
+
+  async function searchPlace(query, stad){
     var sleutel = query.trim().toLowerCase();
     if (zoekCache.hasOwnProperty(sleutel)) return zoekCache[sleutel];
     if (QUOTUM_OP){
@@ -1268,9 +1558,9 @@
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
-        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.regularOpeningHours.periods,places.googleMapsUri,places.location'
+        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.regularOpeningHours.periods,places.googleMapsUri,places.location,places.businessStatus'
       },
-      body: JSON.stringify({ textQuery: query, languageCode: 'nl' })
+      body: JSON.stringify(zoekVerzoek(query, stad))
     });
     if (!res.ok){
       var errText = await res.text();
@@ -1280,9 +1570,24 @@
       throw e;
     }
     var data = await res.json();
-    var resultaat = (data.places && data.places.length > 0) ? data.places[0] : null;
+    // Permanent gesloten zaken overslaan; de eerste zaak die nog bestaat wint.
+    var resultaat = null;
+    (data.places || []).some(function(p){
+      if (p.businessStatus === 'CLOSED_PERMANENTLY') return false;
+      resultaat = p;
+      return true;
+    });
     zoekCache[sleutel] = resultaat;
     return resultaat;
+  }
+
+  function zoekVerzoek(query, stad){
+    var verzoek = { textQuery: query, languageCode: 'nl', regionCode: 'NL' };
+    var m = STAD_MIDDEN[stad];
+    if (m){
+      verzoek.locationBias = { circle: { center: { latitude: m[0], longitude: m[1] }, radius: 15000 } };
+    }
+    return verzoek;
   }
 
   // Een begrijpelijke zin voor de bezoeker, nooit de technische foutmelding.
@@ -1296,9 +1601,37 @@
   // Vertaalt de GETOONDE suggestie naar een passende Google Maps-zoekterm.
   // Zonder dit zoekt hij iets anders dan er op het scherm staat.
   var zoektermRegels = [
+    // --- Voorrangsregels: specifieke combinaties die anders door een algemener woord worden gekaapt ---
+    [/pok\u00e9|poke bowl|bowl food|\bbowls\b/i,                         'poke bowl'],
+    [/brunch|ontbijt/i,                                        'ontbijtzaak'],
+    [/a\u00e7a\u00ed|smoothiebowl|smoothie|verse? (sapjes?|sap)|geperst sap/i, 'smoothiebar'],
+    [/bootcamp/i,                                              'park'],
+    [/wakeboard/i,                                             'wakeboarden'],
+    [/racecircuit/i,                                           'racecircuit'],
+    [/helikopter/i,                                            'helikoptervlucht'],
+    [/ballonvaart/i,                                           'ballonvaart'],
+    [/boodschappen/i,                                          'supermarkt'],
+    [/picknick/i,                                              'park'],
+    [/oester/i,                                                'visrestaurant'],
+    [/italiaans|pasta\b/i,                                    'italiaans restaurant'],
+    [/wijnarrangement|tasting menu|chef's table|sterrenrestaurant|fine dining|verrassingsmenu|blind tasting|moleculair/i, 'fine dining restaurant'],
+    [/cheesecake|tiramisu|dessertbar/i,                        'dessertbar'],
+    [/sorbet|kokosijs|truffel-ijs/i,                           'ijssalon'],
+    [/aperitief met uitzicht|op een rooftop|rooftop/i,         'rooftopbar'],
+    [/livemuziek in een (intiem )?caf\u00e9/i,                 'caf\u00e9 met livemuziek'],
+    [/laatste rondje|laatste drankje|nog een drankje/i,        'caf\u00e9'],
+    [/luxe winkelen|etalages/i,                                'winkelstraat'],
+    [/petit fours?/i,                                          'patisserie'],
+    [/eetcaf\u00e9/i,                                          'eetcaf\u00e9'],
+    [/lunchroom/i,                                             'lunchroom'],
+    [/boekwinkel|boekhandel/i,                                 'boekwinkel'],
+    [/hardloop/i,                                              'park'],
+    [/iets bestellen zonder/i,                                 'restaurant'],
+    [/\bbowlen\b|rondje bowl/i,                              'bowlingbaan'],
+    // --- Algemene regels ---
     [/\bpool\w*\b|\bbiljart/i,             'poolcaf\u00e9'],
     [/\bdart/i,                            'dartcaf\u00e9'],
-    [/\bbowl/i,                            'bowlingbaan'],
+    [/\bbowling/i,                         'bowlingbaan'],
     [/\bminigolf/i,                        'minigolfbaan'],
     [/\bgolf(les|baan|club)?\b/i,          'golfbaan'],
     [/\bpadel/i,                           'padelbaan'],
@@ -1416,10 +1749,10 @@
   // Sommige suggesties horen nergens bij een adres (thuis, onderweg, samen napraten).
   // Daar heeft een Google Maps-resultaat geen zin.
   // Suggesties die je thuis doet — daar hoort geen adres bij, en dat zeggen we er ook bij.
-  var thuisRegex = /serie kijken|aflevering|film kijken thuis|popcorn maken|niks doen|muziek opzetten|thee drinken bij iemand thuis|zelf koken|restjes opwarmen|tosti's bakken|eitjes bakken|balkon|op de kamer|samen opruimen|onder een deken|boek lezen|krantje lezen|havermout maken|soep maken|pasta koken|spelletje spelen|kaarten of een spelletje/i;
+  var thuisRegex = /serie kijken|aflevering|film kijken thuis|popcorn maken|niks doen|muziek opzetten|thee drinken bij iemand thuis|zelf koken|restjes opwarmen|tosti's bakken|eitjes bakken|balkon|op de kamer|samen opruimen|onder een deken|boek lezen|krantje lezen|havermout maken|soep maken|pasta koken|spelletje spelen|kaarten of een spelletje|bij de thee|bij de koffie|zelf maken|zelf pizza/i;
 
   // Suggesties die onderweg of samen gebeuren, zonder vaste plek.
-  var onderwegRegex = /rustig (napraten(?! op| met)|kletsen op (straat|de bank)|samen naar huis|naar huis|terugwandelen|uitlopen|naar huis kuieren)|blijven (zitten|hangen)|terugfietsen|elkaar wegbrengen|muziek(je)? (delen|luisteren|op de terugweg)|vroeg naar huis|laatste blik|vreemden aanspreken|blind een plek|samen koken en meenemen|actief (blijven|afsluiten)|nog een activiteit erbij|actieve (start|afsluiter)|energiek tussendoortje|sportief startmoment|onverwachte plek|verrassingsstop|handje vasthouden|stretchen|cooling down|rekken en strekken|push-up|sprintje/i;
+  var onderwegRegex = /nog even napraten|muziekje opzetten|rustig (napraten(?! op| met)|kletsen op (straat|de bank)|samen naar huis|naar huis|terugwandelen|uitlopen|naar huis kuieren)|blijven (zitten|hangen)|terugfietsen|elkaar wegbrengen|muziek(je)? (delen|luisteren|op de terugweg)|vroeg naar huis|laatste blik|vreemden aanspreken|blind een plek|samen koken en meenemen|actief (blijven|afsluiten)|nog een activiteit erbij|actieve (start|afsluiter)|energiek tussendoortje|sportief startmoment|onverwachte plek|verrassingsstop|handje vasthouden|stretchen|cooling down|rekken en strekken|push-up|sprintje/i;
 
   function geenLocatie(titel){
     return thuisRegex.test(titel) || onderwegRegex.test(titel);
@@ -1471,7 +1804,9 @@
             continue;
           }
           var getoondeTitel = titelEl ? titelEl.textContent : '';
-          var fallback = randomItem(queries[i % queries.length]);
+          var rolIdx = titelEl ? STAP_NAMEN.indexOf(titelEl.getAttribute('data-stap')) : -1;
+          if (rolIdx < 0) rolIdx = i;
+          var fallback = randomItem(queries[rolIdx % queries.length]);
           var zoekterm = zoektermVoor(getoondeTitel, fallback);
           if (zoekterm){
             await applyPlaceToRow(i + 1, zoekterm, stad);
@@ -1494,7 +1829,7 @@
   }
 
   async function applyPlaceToRow(rowIndex, query, stad){
-    var place = await searchPlace(query + ' in ' + stad);
+    var place = await searchPlace(query + ' in ' + stad, stad);
     var titleEl = document.getElementById('plan-title-' + rowIndex);
     var subEl = document.getElementById('plan-sub-' + rowIndex);
 
@@ -1521,11 +1856,12 @@
   }
 
   function clearThemeLabel(){
-    if (!currentTheme) return;
+    // Na een eigen aanpassing is het niet meer het samengestelde plan: titel weghalen.
     currentTheme = null;
+    huidigPlanIdee = null;
     var summary = document.getElementById('plan-summary');
     if (summary){
-      summary.textContent = summary.textContent.replace(/\s*\u2014\s*verrassingsthema:.*$/, '');
+      summary.textContent = summary.textContent.replace(/\s*\u2014\s.*$/, '');
     }
   }
 
@@ -1612,7 +1948,10 @@
     var tier = budgetSel ? budgetTier(budgetSel.value) : 'middel';
     var momentSel = document.getElementById('sel-moment');
     var dagdeel = momentSel ? momentSel.value : 'avond';
-    var stapIndex = rowIndex - 1;
+    var rijEl = document.getElementById('plan-title-' + rowIndex);
+    var rolNaam = rijEl ? rijEl.getAttribute('data-stap') : null;
+    var stapIndex = rolNaam ? STAP_NAMEN.indexOf(rolNaam) : rowIndex - 1;
+    if (stapIndex < 0) stapIndex = rowIndex - 1;
 
     // Combineer dezelfde stap uit alle drie de budget-niveaus voor maximale variatie,
     // met respect voor het dagdeel bij de eerste twee stappen.

@@ -96,6 +96,12 @@
     margin-bottom:12px;background:var(--surface);box-shadow:var(--shadow-sm);}
   .result-card.best{border-color:var(--coral);box-shadow:0 0 0 2px var(--coral-soft);}
   .result-card h3{font-size:16px;margin:0 0 10px;display:flex;justify-content:space-between;}
+  .mijn-plan{display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:14px 16px;margin-bottom:10px;border:1.5px solid var(--line-soft);border-radius:var(--radius-md);
+    background:var(--surface);text-decoration:none;color:var(--ink);box-shadow:var(--shadow-sm);}
+  .mijn-plan:hover{border-color:var(--coral);}
+  .mijn-plan strong{font-size:15px;font-weight:600;}
+  .mijn-plan span{font-size:13px;color:var(--muted);white-space:nowrap;}
   .result-bar-track{background:var(--line-soft);height:8px;border-radius:var(--radius-pill);overflow:hidden;}
   .result-bar-fill{background:var(--coral);height:100%;width:0%;transition:width .3s ease;}
 
@@ -117,38 +123,16 @@
 
   <!-- SETUP: alleen zichtbaar voordat er een linkje bestaat -->
   <div class="block" id="setup-block">
-    <p class="demo-col-label">Opties genereren</p>
-
-    <div class="field-row">
-      <label for="setup-stad">Stad</label>
-      <select id="setup-stad" class="chip-select">
-        <option value="Amsterdam">Amsterdam</option>
-        <option value="Rotterdam">Rotterdam</option>
-        <option value="Den Haag">Den Haag</option>
-        <option value="Utrecht">Utrecht</option>
-        <option value="Eindhoven">Eindhoven</option>
-        <option value="Groningen">Groningen</option>
-        <option value="Tilburg">Tilburg</option>
-        <option value="Almere">Almere</option>
-        <option value="Breda">Breda</option>
-        <option value="Nijmegen">Nijmegen</option>
-      </select>
+    <div class="card">
+      <h3 style="margin:0 0 10px;">Een stemming start je vanuit de planner</h3>
+      <p style="margin:0 0 18px;color:var(--muted);">Vul je wensen in, en kies dan &#8216;Laat de groep kiezen&#8217;. Uitje maakt drie varianten die bij je wensen passen.</p>
+      <a class="nav-btn" href="./index.html#plannen">Naar de planner</a>
     </div>
-    <div class="field-row">
-      <label for="setup-budget">Budget</label>
-      <select id="setup-budget" class="chip-select">
-        <option value="15">tot &euro;15 p.p.</option>
-        <option value="25" selected>rond &euro;25 p.p.</option>
-        <option value="40">rond &euro;40 p.p.</option>
-        <option value="60">rond &euro;60 p.p.</option>
-        <option value="onbeperkt">geen vast budget</option>
-      </select>
-    </div>
+  </div>
 
-    <input type="text" name="website" id="hp-setup" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
-
-    <button type="button" class="nav-btn" onclick="createPollFromSetup()">Genereer 3 opties en maak linkje</button>
-    <p class="microcopy" id="setup-status" style="margin-top:10px;">Liever vanuit een eigen plan? <a href="./index.html#plannen" style="color:var(--coral);text-decoration:underline;">Maak eerst je Uitje</a>.</p>
+  <div class="block" id="mijn-stemmingen-block" style="display:none;">
+    <p class="demo-col-label">Je stemmingen</p>
+    <div id="mijn-stemmingen"></div>
   </div>
 
   <!-- JIJ DEELT -->
@@ -160,7 +144,7 @@
     </div>
     <p class="microcopy" id="share-note">Deel dit met je groep.</p>
     <p class="microcopy demo-note" id="setup-note" style="display:none;">Let op: er is nu een storing, dit linkje werkt tijdelijk niet. Probeer het later opnieuw.</p>
-    <p class="microcopy"><a href="#" onclick="startNewPoll(); return false;" style="color:var(--blue); text-decoration:underline;">Nieuwe opties genereren</a></p>
+    <p class="microcopy"><a href="#" onclick="startNewPoll(); return false;" style="color:var(--blue); text-decoration:underline;">Nieuwe stemming maken</a></p>
   </div>
 
   <!-- ZIJ STEMMEN -->
@@ -184,6 +168,14 @@
     </div>
   </div>
 
+  <div class="block" id="next-block" style="display:none;">
+    <div class="card" style="border-color:var(--coral);background:var(--coral-soft);">
+      <h3 style="margin:0 0 8px;" id="next-titel">De groep heeft gekozen</h3>
+      <p style="margin:0 0 16px;color:var(--muted);">Geef nu door wanneer je kunt.</p>
+      <a class="nav-btn" id="next-link" href="#">Kies je datum</a>
+    </div>
+  </div>
+
   <!-- RESULTAAT -->
   <div class="block" id="result-block" style="display:none;">
     <div class="share-box" style="margin-bottom:10px;">
@@ -192,9 +184,7 @@
     </div>
     <div id="result-cards"></div>
     <p class="result-text" id="result-text"></p>
-    <div class="share-box" id="winner-box" style="display:none;margin-top:18px;">
-      <button type="button" class="nav-btn" id="winner-btn" onclick="useWinner()"></button>
-    </div>
+    <div class="share-box" id="winner-box" style="display:none;margin-top:18px;"></div>
     <p class="microcopy" id="winner-status" style="margin-top:8px;"></p>
   </div>
 </main>
@@ -208,15 +198,53 @@
   var SUPABASE_ANON_KEY = 'sb_publishable_ZMe6lfs6wx1E2EapJeT5QA_GDIbN6r7';
   var SUPABASE_READY = SUPABASE_URL.indexOf('VUL-IN') === -1 && SUPABASE_ANON_KEY.indexOf('VUL-IN') === -1;
 
-  var sfeerLabels = ["gezellig", "romantisch", "avontuurlijk", "chill", "actief"];
+  // ===== VEILIGHEID =====
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch){
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+  }
+  function lokaleDatum(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
 
-  var sfeerMapMini = {
-    gezellig:     ["Borrel bij een gezellig caf\u00e9", "Diner, klein en informeel", "Avondwandeling"],
-    romantisch:   ["Wijntje op een rustig terras", "Diner voor twee, kaarslicht", "Rustige wandeling langs het water"],
-    avontuurlijk: ["Verrassende borrel op een onbekende plek", "Streetfood of een nieuw restaurant", "Nachtelijke ontdekkingstocht"],
-    chill:        ["Rustige borrel om bij te kletsen", "Ontspannen diner, geen haast", "Rustig terugwandelen"],
-    actief:       ["Bowling of minigolf om los te komen", "Snel en lekker eten tussendoor", "Actieve afsluiter buiten"]
-  };
+  function korteDatum(iso){
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || '')) return '';
+    return new Date(iso + 'T12:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+  }
+
+  // ===== DATABASE: alleen via vaste loketten =====
+  async function rpc(naam, body){
+    var res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + naam, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error('rpc ' + naam + ' ' + res.status);
+    return res.json();
+  }
+  function nieuwToken(){
+    var bytes = new Uint8Array(18);
+    (window.crypto || window.msCrypto).getRandomValues(bytes);
+    return Array.prototype.map.call(bytes, function(b){ return ('0' + b.toString(16)).slice(-2); }).join('');
+  }
+
+  // ===== EIGEN STEMMINGEN =====
+  var MIJN_KEY = 'uitje_mijn_stemmingen';
+  function mijnStemmingen(){
+    try { return JSON.parse(localStorage.getItem(MIJN_KEY) || '[]'); } catch (err){ return []; }
+  }
+  function bewaarMijnStemming(p){
+    var lijst = mijnStemmingen().filter(function(x){ return x.code !== p.code; });
+    lijst.unshift(p);
+    try { localStorage.setItem(MIJN_KEY, JSON.stringify(lijst.slice(0, 20))); } catch (err){}
+  }
+  function vindMijnStemming(code){
+    var gevonden = null;
+    mijnStemmingen().forEach(function(p){ if (p.code === code) gevonden = p; });
+    return gevonden;
+  }
 
   var pollCode = null;
   var pollOptions = [];
@@ -236,72 +264,7 @@
     if (el) el.style.display = show ? 'block' : 'none';
   }
 
-  function generateOptions(stad, budget){
-    var shuffled = sfeerLabels.slice().sort(function(){ return Math.random() - 0.5; });
-    var picks = shuffled.slice(0, 3);
-    return picks.map(function(sfeer){
-      var steps = sfeerMapMini[sfeer] || sfeerMapMini.gezellig;
-      return {
-        label: sfeer.charAt(0).toUpperCase() + sfeer.slice(1) + ' in ' + stad,
-        steps: steps
-      };
-    });
-  }
 
-  async function createPollFromSetup(){
-    var status = document.getElementById('setup-status');
-    var honeypot = document.getElementById('hp-setup');
-    if (honeypot && honeypot.value){
-      return; // bot
-    }
-
-    var stad = document.getElementById('setup-stad').value;
-    var budget = document.getElementById('setup-budget').value;
-    var options = generateOptions(stad, budget);
-
-    var chars = 'abcdefghijkmnpqrstuvwxyz23456789';
-    var code = '';
-    for (var i = 0; i < 6; i++){
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
-    if (SUPABASE_READY){
-      try {
-        var res = await fetch(SUPABASE_URL + '/rest/v1/option_polls', {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({ id: code, options: options, context: { stad: stad, budget: budget } })
-        });
-        if (!res.ok){
-          var errText = await res.text();
-          console.error('Supabase fout bij poll aanmaken:', res.status, errText);
-          if (status) status.textContent = 'Fout (' + res.status + '): ' + errText;
-          return;
-        }
-      } catch (err){
-        console.error('Kon poll niet aanmaken:', err);
-        if (status) status.textContent = 'Netwerkfout: ' + err.message;
-        return;
-      }
-    }
-
-    pollCode = code;
-    pollOptions = options;
-    pollContext = { stad: stad, budget: budget };
-    try { localStorage.setItem('uitje_eigen_poll_code', code); } catch (err) { /* no-op */ }
-
-    showBlock('setup-block', false);
-    showShareBlock();
-    showBlock('respond-block', true);
-    renderOptionCards();
-    renderResultCards();
-    refreshResults();
-  }
 
   function showShareBlock(){
     var link = document.getElementById('share-link');
@@ -313,12 +276,7 @@
   }
 
   function startNewPoll(){
-    try { localStorage.removeItem('uitje_eigen_poll_code'); } catch (err) { /* no-op */ }
-    if (getPollCodeFromURL()){
-      window.location.href = window.location.origin + window.location.pathname;
-      return;
-    }
-    window.location.reload();
+    window.location.href = './index.html#plannen';
   }
 
   function copyShareLink(){
@@ -347,14 +305,10 @@
   async function fetchPollInfo(code){
     if (!SUPABASE_READY) return null;
     try {
-      var res = await fetch(SUPABASE_URL + '/rest/v1/option_polls?id=eq.' + encodeURIComponent(code) + '&select=options,context', {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
-      });
-      var data = await res.json();
-      if (data && data.length > 0) return data[0];
-      return null;
+      var data = await rpc('get_poll', { p_id: code });
+      return (data && data.length > 0) ? data[0] : null;
     } catch (err){
-      console.error('Kon poll niet ophalen:', err);
+      console.error('Kon stemming niet ophalen:', err);
       return null;
     }
   }
@@ -366,7 +320,7 @@
     catch (err) { return false; }
   }
 
-  function markAlreadyVoted(){
+  function markAlreadyVoted(naamNet){
     var block = document.getElementById('respond-block');
     if (!block) return;
     var cards = document.getElementById('option-cards');
@@ -381,7 +335,8 @@
       btn.style.cursor = 'default';
     }
     var status = document.getElementById('resp-status');
-    if (status) status.innerHTML = 'Je hebt al gestemd. <a href="#" onclick="resetMyVote(); return false;" style="color:var(--coral);text-decoration:underline;">Opnieuw stemmen</a>';
+    var begin = naamNet ? 'Bedankt ' + esc(naamNet) + '! Je stem is opgeslagen.' : 'Je hebt al gestemd.';
+    if (status) status.innerHTML = begin + ' <a href="#" onclick="resetMyVote(); return false;" style="color:var(--coral);text-decoration:underline;">Opnieuw stemmen</a>';
   }
 
   function resetMyVote(){
@@ -395,18 +350,18 @@
     var html = '';
     pollOptions.forEach(function(opt, idx){
       var inner = '';
-      if (opt.items && opt.items.length){
-        inner = '<ul>' + opt.items.map(function(it){
-          return '<li><strong style="font-weight:600;color:var(--ink);">' + (it.tijd ? it.tijd + ' \u00b7 ' : '') + '</strong>' + it.titel + '</li>';
+      var items = Array.isArray(opt.items) ? opt.items : [];
+      if (items.length){
+        inner = '<ul>' + items.map(function(it){
+          return '<li><strong style="font-weight:600;color:var(--ink);">' + (it.tijd ? esc(it.tijd) + ' \u00b7 ' : '') + '</strong>' + esc(it.titel) + '</li>';
         }).join('') + '</ul>';
-      } else if (opt.steps){
-        inner = '<ul>' + opt.steps.map(function(s){ return '<li>' + s + '</li>'; }).join('') + '</ul>';
+      } else if (Array.isArray(opt.steps)){
+        inner = '<ul>' + opt.steps.map(function(s){ return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>';
       }
       html += '<div class="option-card" data-choice="' + idx + '" onclick="selectOption(' + idx + ')">' +
-        '<h3>' + opt.label + '</h3>' + inner + '</div>';
+        '<h3>' + esc(opt.label) + '</h3>' + inner + '</div>';
     });
     container.innerHTML = html;
-
     if (hasAlreadyVoted()) markAlreadyVoted();
   }
 
@@ -460,9 +415,8 @@
         if (status) status.textContent = 'Fout (' + res.status + '): ' + errText;
         return;
       }
-      if (status) status.textContent = 'Bedankt ' + naam + '! Je stem is opgeslagen.';
       try { localStorage.setItem('uitje_gestemd_' + pollCode, '1'); } catch (err) { /* no-op */ }
-      markAlreadyVoted();
+      markAlreadyVoted(naam);
       refreshResults();
     } catch (err){
       console.error('Kon stem niet opslaan:', err);
@@ -476,7 +430,7 @@
     var html = '';
     pollOptions.forEach(function(opt, idx){
       html += '<div class="result-card" id="result-card-' + idx + '">' +
-        '<h3><span>' + opt.label + '</span><span id="result-count-' + idx + '">0</span></h3>' +
+        '<h3><span>' + esc(opt.label) + '</span><span id="result-count-' + idx + '">0</span></h3>' +
         '<div class="result-bar-track"><div class="result-bar-fill" id="result-bar-' + idx + '"></div></div>' +
         '</div>';
     });
@@ -485,55 +439,45 @@
 
   async function refreshResults(){
     var resultText = document.getElementById('result-text');
-    if (!SUPABASE_READY){
-      if (resultText) resultText.innerHTML = '<strong>Nog niet gekoppeld</strong> &#8212; vul de Supabase-gegevens in de code in.';
-      return;
-    }
-    if (!pollCode || pollOptions.length === 0){
-      if (resultText) resultText.textContent = 'Nog geen stemming gevonden.';
-      return;
-    }
+    if (!SUPABASE_READY || !pollCode || pollOptions.length === 0) return;
     try {
-      var res = await fetch(SUPABASE_URL + '/rest/v1/option_votes?poll_id=eq.' + encodeURIComponent(pollCode) + '&select=choice', {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
-      });
-      var data = await res.json();
+      var data = await rpc('get_votes', { p_poll_id: pollCode });
       var total = data.length;
-      var counts = [0, 0, 0];
+      var counts = pollOptions.map(function(){ return 0; });
       data.forEach(function(r){
         if (typeof r.choice === 'number' && counts[r.choice] !== undefined) counts[r.choice]++;
       });
+      var max = Math.max.apply(null, counts);
+      var besten = [];
+      counts.forEach(function(n, i){ if (max > 0 && n === max) besten.push(i); });
 
-      var bestIdx = 0;
       pollOptions.forEach(function(opt, idx){
-        if (counts[idx] > counts[bestIdx]) bestIdx = idx;
         var pct = total > 0 ? Math.round((counts[idx] / total) * 100) : 0;
         var countEl = document.getElementById('result-count-' + idx);
         var barEl = document.getElementById('result-bar-' + idx);
         var cardEl = document.getElementById('result-card-' + idx);
         if (countEl) countEl.textContent = counts[idx];
         if (barEl) barEl.style.width = pct + '%';
-        if (cardEl) cardEl.classList.remove('best');
+        if (cardEl) cardEl.classList.toggle('best', besten.indexOf(idx) !== -1);
       });
-      if (total > 0){
-        var bestCard = document.getElementById('result-card-' + bestIdx);
-        if (bestCard) bestCard.classList.add('best');
+
+      if (!resultText) return;
+      if (total === 0){
+        resultText.innerHTML = '<strong>Nog geen stemmen</strong> &#8212; deel het linkje om stemmen te verzamelen.';
+      } else if (besten.length > 1){
+        resultText.innerHTML = '<strong>Gelijkspel</strong> \u2014 ' + esc(besten.map(function(i){ return pollOptions[i].label; }).join(' en ')) + ' (' + max + ' stemmen elk)';
+      } else {
+        resultText.innerHTML = '<strong>Winnaar: ' + esc(pollOptions[besten[0]].label) + '</strong> \u2014 ' + max + ' van de ' + total + ' stemmen';
       }
 
-      if (resultText){
-        if (total === 0){
-          resultText.innerHTML = '<strong>Nog geen stemmen</strong> &#8212; deel het linkje om stemmen te verzamelen.';
-        } else {
-          resultText.innerHTML = '<strong>Winnaar: ' + pollOptions[bestIdx].label + '</strong> \u2014 ' + counts[bestIdx] + ' van de ' + total + ' stemmen';
-          // Alleen de organisator kan de winnaar vastzetten als het definitieve plan.
-          var winBox = document.getElementById('winner-box');
-          var winBtn = document.getElementById('winner-btn');
-          if (winBox && winBtn && !getPollCodeFromURL()){
-            winBtn.setAttribute('data-idx', bestIdx);
-            winBtn.textContent = 'Ga verder met: ' + pollOptions[bestIdx].label;
-            winBox.style.display = 'flex';
-          }
-        }
+      // Alleen de organisator kiest; bij gelijkspel verschijnt een knop per optie.
+      var mijn = vindMijnStemming(pollCode);
+      var winBox = document.getElementById('winner-box');
+      if (winBox && mijn && mijn.token && besten.length){
+        winBox.innerHTML = besten.map(function(i){
+          return '<button type="button" class="nav-btn" onclick="useWinner(' + i + ')">Ga verder met: ' + esc(pollOptions[i].label) + '</button>';
+        }).join('');
+        winBox.style.display = 'flex';
       }
     } catch (err){
       console.error('Kon resultaten niet ophalen:', err);
@@ -541,12 +485,13 @@
     }
   }
 
-  function useWinner(){
-    var idx = parseInt(document.getElementById('winner-btn').getAttribute('data-idx'), 10);
+  function useWinner(idx){
     var winner = pollOptions[idx];
-    if (!winner) return;
+    var mijn = vindMijnStemming(pollCode);
+    if (!winner || !mijn) return;
 
     var ctx = pollContext || {};
+    var label = String(winner.label || '');
     var plan = {
       stad: ctx.stad || '',
       personen: ctx.personen || 1,
@@ -554,81 +499,74 @@
       dagdeel: ctx.dagdeel || 'avond',
       vervoer: ctx.vervoer || 'lopend',
       budget: ctx.budget || '',
+      idee: label.indexOf(': ') !== -1 ? label.split(': ').slice(1).join(': ') : label,
       thema: null,
-      items: winner.items || (winner.steps || []).map(function(s, i){
-        return { tijd: '', titel: s, sub: '', adres: null, link: null };
-      })
+      items: Array.isArray(winner.items) ? winner.items : []
     };
-
     try {
       localStorage.setItem('uitje_bevestigd_plan', JSON.stringify(plan));
-      // Oude datumprikker opruimen: dit is een nieuw plan, dus ook een nieuwe stemming over datums.
-      localStorage.removeItem('uitje_eigen_plan_code');
-    } catch (err) { /* no-op */ }
+      // Zodra de datumprikker is gemaakt, wordt deze stemming eraan gekoppeld.
+      localStorage.setItem('uitje_van_stemming', JSON.stringify({ code: pollCode, token: mijn.token }));
+    } catch (err){}
     window.location.href = './uitje-plan.html';
   }
 
   async function init(){
-    var existingCode = getPollCodeFromURL();
+    // Oudere versie: losse code zonder beheersleutel meenemen in de lijst.
+    try {
+      var oud = localStorage.getItem('uitje_eigen_poll_code');
+      if (oud && !vindMijnStemming(oud)) bewaarMijnStemming({ code: oud, token: null, titel: 'Eerdere stemming', datum: '' });
+      localStorage.removeItem('uitje_eigen_poll_code');
+    } catch (err){}
 
-    if (existingCode){
-      pollCode = existingCode;
-      var info = await fetchPollInfo(existingCode);
-
-      if (!info || !info.options || info.options.length === 0){
-        showBlock('setup-block', false);
-        showBlock('share-block', false);
-        showBlock('respond-block', false);
-        showBlock('result-block', false);
+    var code = getPollCodeFromURL();
+    if (code){
+      pollCode = code;
+      var info = await fetchPollInfo(code);
+      if (!info || !Array.isArray(info.options) || info.options.length === 0){
+        ['setup-block','share-block','respond-block','result-block'].forEach(function(id){ showBlock(id, false); });
         showBlock('notfound-block', true);
         return;
       }
-
       pollOptions = info.options;
       pollContext = info.context || null;
       showBlock('setup-block', false);
-      showBlock('share-block', false);
-      showBlock('respond-block', true);
-      renderOptionCards();
+      if (vindMijnStemming(code)) showShareBlock();
+
+      // Heeft de groep al gekozen? Dan iedereen doorsturen naar de datumprikker.
+      if (info.next_plan && /^[a-z0-9]{4,12}$/.test(info.next_plan)){
+        var nl = document.getElementById('next-link');
+        if (nl) nl.href = './uitje-plan.html?plan=' + encodeURIComponent(info.next_plan);
+        showBlock('next-block', true);
+        showBlock('respond-block', false);
+      } else {
+        showBlock('respond-block', true);
+        renderOptionCards();
+      }
       renderResultCards();
       showBlock('result-block', true);
       refreshResults();
-      if (SUPABASE_READY) setInterval(refreshResults, 10000);
+      if (SUPABASE_READY && !info.next_plan) setInterval(refreshResults, 10000);
       return;
     }
 
-    var stored = null;
-    try { stored = localStorage.getItem('uitje_eigen_poll_code'); } catch (err) { /* no-op */ }
-
-    if (stored){
-      var ownInfo = await fetchPollInfo(stored);
-      if (ownInfo && ownInfo.options && ownInfo.options.length > 0){
-        pollCode = stored;
-        pollOptions = ownInfo.options;
-        pollContext = ownInfo.context || null;
-        showBlock('setup-block', false);
-        showShareBlock();
-        showBlock('respond-block', true);
-        renderOptionCards();
-        renderResultCards();
-        refreshResults();
-        if (SUPABASE_READY) setInterval(refreshResults, 10000);
-        return;
-      }
-      try { localStorage.removeItem('uitje_eigen_poll_code'); } catch (err) { /* no-op */ }
-    }
-
-    // Kwam de gebruiker vanuit de planner? Dan direct een stemming maken met die varianten.
+    // Vanuit de planner? Meteen een stemming maken met die varianten.
     var concept = loadConceptOptions();
-    if (concept && concept.options && concept.options.length > 0){
+    if (concept && Array.isArray(concept.options) && concept.options.length > 0){
       await createPollFromConcept(concept);
       return;
     }
 
+    var lijst = mijnStemmingen();
+    if (lijst.length){
+      document.getElementById('mijn-stemmingen').innerHTML = lijst.map(function(p){
+        return '<a class="mijn-plan" href="' + esc(buildShareLink(p.code)) + '"><strong>' + esc(p.titel || 'Stemming') + '</strong>' +
+          (p.datum ? '<span>gemaakt ' + esc(korteDatum(p.datum)) + '</span>' : '') + '</a>';
+      }).join('');
+      showBlock('mijn-stemmingen-block', true);
+    }
     showBlock('setup-block', true);
-    showBlock('share-block', false);
-    showBlock('respond-block', false);
-    showBlock('result-block', false);
+    ['share-block','respond-block','result-block'].forEach(function(id){ showBlock(id, false); });
   }
 
   function loadConceptOptions(){
@@ -640,7 +578,7 @@
 
   async function createPollFromConcept(concept){
     var code = randomCode();
-
+    var token = nieuwToken();
     if (SUPABASE_READY){
       try {
         var res = await fetch(SUPABASE_URL + '/rest/v1/option_polls', {
@@ -651,7 +589,7 @@
             'Content-Type': 'application/json',
             'Prefer': 'return=minimal'
           },
-          body: JSON.stringify({ id: code, options: concept.options, context: {
+          body: JSON.stringify({ id: code, options: concept.options, beheer_token: token, context: {
             stad: concept.stad, personen: concept.personen, budget: concept.budget,
             dagdeel: concept.dagdeel, vervoer: concept.vervoer
           }})
@@ -667,22 +605,10 @@
         return;
       }
     }
-
-    pollCode = code;
-    pollOptions = concept.options;
-    pollContext = concept;
-    try {
-      localStorage.setItem('uitje_eigen_poll_code', code);
-      localStorage.removeItem('uitje_concept_opties');
-    } catch (err) { /* no-op */ }
-
-    showBlock('setup-block', false);
-    showShareBlock();
-    showBlock('respond-block', true);
-    renderOptionCards();
-    renderResultCards();
-    refreshResults();
-    if (SUPABASE_READY) setInterval(refreshResults, 10000);
+    bewaarMijnStemming({ code: code, token: token, titel: 'Stemming \u00b7 ' + (concept.stad || ''), datum: lokaleDatum() });
+    try { localStorage.removeItem('uitje_concept_opties'); } catch (err){}
+    // Ook de organisator gebruikt het deelbare linkje.
+    window.location.href = buildShareLink(code);
   }
 
   function randomCode(){
